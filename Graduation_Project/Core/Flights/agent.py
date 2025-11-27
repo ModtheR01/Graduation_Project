@@ -1,6 +1,6 @@
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
-from Core.tools import search_for_flights
+from Graduation_Project.Core.search_flights.tools import search_for_flights
 from Config.settings import OPENROUTER_KEY , GEMINI_KEY
 from Config.models_config import default_model
 
