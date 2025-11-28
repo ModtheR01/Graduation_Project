@@ -10,9 +10,11 @@ models={
     "deepseek2"   :"tngtech/deepseek-r1t2-chimera:free",
     "Sherlock"    :"openrouter/sherlock-think-alpha",
     "Sherlockalpha"   :"openrouter/sherlock-dash-alpha",
+
 }
 
 #default_model=models["Llama4"]
 default_model=models["Llama4"]
 
-default_model=models["Llama4"]
+# chat by2ol eno a7san 3l4an by3tmd 3la 70 parameter 
+classify_model=models["Llama3"]

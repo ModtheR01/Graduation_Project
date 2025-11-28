@@ -1,5 +1,5 @@
 from langchain.agents import create_agent
-from Core.email_sending.send_mail_tool import send_email
+from Core.email_sending.tools import send_email,search_in_contact,add_new_contact
 from langchain_openai import ChatOpenAI
 from Config.models_config import default_model
 from Config.settings import OPENROUTER_KEY
@@ -24,12 +24,14 @@ llm = ChatOpenAI(
 
 agent = create_agent(
     llm,
-    tools=[send_email],              
+    tools=[send_email,search_in_contact,add_new_contact],              
 )
 
 print("Agent Created...")
 result = agent.invoke({
-    "messages":[("system",system_prompt),("ai",assistant_prompt),("human",human_prompt)]
+    "messages":[("system",system_prompt)
+                #,("ai",assistant_prompt)
+                ,("human",human_prompt)]
 })
 print(result["messages"][-1].content)
 

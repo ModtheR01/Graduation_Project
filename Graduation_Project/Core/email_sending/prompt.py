@@ -20,7 +20,20 @@ Your goal: Write and send emails that feel authentic, context-aware, and persona
 
 """
 
-#When the email is ready and fully structured, if appropriate, call the `send_email` tool using its required parameters (to, subject, body).
+#SEARCH IN CONTACT SCENARIO
+#human_prompt= "send an email to customer support telling them restart the router"
+
+
+# ADD TO CONTACT SCENARIO
+human_prompt=" add this guy anas.say3d@gmail.com named anas"
+
+
+
+#DIRECT SEND MAIL SENARIO
+#human_prompt="send an email to ```drystore.eg@gmail.com``` telling him iam sick and i wont be able to attend tommorw meeting "
+
+
+#CHECKING APPROVAL SCENARIO
 
 assistant_prompt="""Subject: Unable to Attend Tomorrow's Meeting
 To: dry (drystore.eg@gmail.com)
@@ -36,8 +49,9 @@ anas
 
 Please review the email content. If you are satisfied, please confirm to send the email. I will set "is_approved" to True.
 
-To confirm, please respond with "Yes, send the email" or request any changes."""
+To confirm, please respond with "Yes, send the email" or request any changes.
+
+"""
 
 
-#1  human_prompt="send an email to ```drystore.eg@gmail.com``` telling him iam sick and i wont be able to attend tommorw meeting "
-human_prompt="yes send it"
+#human_prompt="yes send it"
