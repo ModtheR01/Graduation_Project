@@ -21,6 +21,9 @@ def message_agent(prompt):
     messages["messages"].append(("human", prompt))
 
     response = agent.invoke(messages)["messages"][-1].content
-    print("assistant:", response)
+    if response != "":
+        print("assistant:", response)
+    else:
+        print("assistant:", "Sorry, iam a bit confused can you please ask me agian in more simple way")
 
     messages["messages"].append(( "ai",response))
