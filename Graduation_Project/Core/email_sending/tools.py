@@ -79,11 +79,15 @@ def send_email(to, subject, body,is_approved:False):
     message = {"raw": raw_message}
     print("checking approval...")
     if is_approved:
-        # Send email
-        sent_message = service.users().messages().send(
-            userId="me", body=message
-        ).execute()
-        print("📧 Email sent! ID:", sent_message["id"])
+        try:
+            # Send email (this is normal post api request managed by google sdk)
+            sent_message = service.users().messages().send(
+                userId="me", body=message
+            ).execute()
+            print("📧 Email sent! ID:", sent_message["id"])
+        except:
+            print("Google api isnt responding right now, please try later! ")
+        
     else:
         print("need to ask user for approval")
 

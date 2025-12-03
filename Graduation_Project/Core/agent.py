@@ -4,6 +4,7 @@ from Config.models_config import classify_model,default_model
 from Config.settings import OPENROUTER_KEY
 from Core.prompt import system_prompt
 from Core.email_sending.tools import send_email, search_in_contact ,add_new_contact
+from Core.Todo.tools import create_todo,delete_todo,set_state_true,get_all_todo_items
 
 llm = ChatOpenAI(
     model = default_model,
@@ -13,7 +14,7 @@ llm = ChatOpenAI(
 )
 
 # TODO adding the rest of the tools
-agent = create_agent(llm,[send_email, search_in_contact ,add_new_contact])
+agent = create_agent(llm,[send_email, search_in_contact ,add_new_contact,create_todo,delete_todo,set_state_true,get_all_todo_items])
 print("agent created ....")
 messages = {"messages":[("system", system_prompt)]}
 
