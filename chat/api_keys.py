@@ -1,0 +1,15 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+OPENROUTER_KEY = os.getenv("OpenRouter_key")
+GEMINI_KEY = os.getenv("Gemini_key")
+Amadeus_BaseURL= os.getenv("AMADEUS_BASE_URL")
+Amadeus_Key = os.getenv("Amadeus_APIKEY")
+Amadeus_SecretKey = os.getenv("Amadeus_APISecret")
+Deep_Seek_key=os.getenv("Deep_Seek_key")
+Stripe_Publishable=os.getenv("STRIPE_PUBLISHABLE")
+Stripe_Secret=os.getenv("STRIPE_SECRET")
+Stripe_Webhook_Secret=os.getenv("STRIPE_WEBHOOK_SECRET")
+
