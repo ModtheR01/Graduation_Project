@@ -12,7 +12,7 @@ from .serializers import SignupSerializer, LoginSerializer
 def signup(request):
     serializer = SignupSerializer(data=request.data)
     if serializer.is_valid():
-        user = serializer.save()
+        user = serializer.save() # takes the validated_data and create a new user in the database using the create method in the SignupSerializer  
         refresh = RefreshToken.for_user(user)
         return Response({
             'access': str(refresh.access_token),
@@ -27,7 +27,7 @@ def login(request):
     if serializer.is_valid():
         user = authenticate(
             request,
-            username=serializer.validated_data['email'],
+            username=serializer.validated_data['email'], # validated_data => contains the cleaned and validated input data,is available only after calling [serializer.is_valid()] => must return true to access it 
             password=serializer.validated_data['password']
         )
         if user:

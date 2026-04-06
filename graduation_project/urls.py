@@ -24,5 +24,6 @@ urlpatterns = [
     path('payment/',include('payment.urls')),
     path('Users/',include('Users.urls')),
     path('token/refresh/', TokenRefreshView.as_view()),
-    path('chat/',include('chat.urls'))
+    path('chat/',include('chat.urls')),
+    path('hotels/',include('Hotels.urls')),
 ]

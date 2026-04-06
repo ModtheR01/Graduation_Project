@@ -15,7 +15,7 @@ class UserManager(BaseUserManager): # our manager
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
 
-class User(AbstractBaseUser, PermissionsMixin): # this class must inherit from AbstractBaseUser and PermissionsMixin to tell django that 'this table has login and permissions ,....' and AbstractBaseUser makes our manager works 
+class User(AbstractBaseUser, PermissionsMixin): # this class must inherit from AbstractBaseUser and PermissionsMixin to tell django that 'this table has login and permissions ,....' and [AbstractBaseUser provides the core authentication logic (password hashing, login handling),but leaves user fields and structure fully customizable (e.g., use email instead of username).]
     email = models.EmailField(primary_key=True)
     password = models.CharField(max_length=128)
     fname = models.CharField(max_length=15)
