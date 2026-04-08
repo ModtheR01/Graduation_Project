@@ -101,8 +101,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'graduation_project.wsgi.application'
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS =True  
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS  = True  
+CORS_ALLOW_CREDENTIALS  = True
 
 CORS_ALLOW_METHODS = [
     'DELETE',
