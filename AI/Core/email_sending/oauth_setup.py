@@ -136,6 +136,8 @@ def save_tokens(token_data: dict):
     """
     Save tokens to tokens.json so we can reuse them later.
     """
+    if TOKENS_FILE is None:
+        raise Exception("TOKENS_FILE not set")
     with open(TOKENS_FILE, "w", encoding="utf-8") as f:
         json.dump(token_data, f, indent=2)
     print(f"[OAuth] Tokens saved to {TOKENS_FILE}")

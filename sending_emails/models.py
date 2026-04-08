@@ -5,7 +5,7 @@ from Users.models import User
 # Create your models here.
 class Contacts(models.Model):
     receiver_email = models.CharField(max_length=50)
-    user_email = models.ForeignKey(User, models.DO_NOTHING, db_column='user_email')
+    user_email = models.ForeignKey(User, models.CASCADE, db_column='user_email')
     nickname = models.CharField(max_length=30)
     contact_id = models.AutoField(primary_key=True)
 

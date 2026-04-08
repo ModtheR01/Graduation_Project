@@ -10,7 +10,7 @@ from Core.email_sending.mock_contact import contact_list
 def search_in_contact():
     """
     use this tools whenever user want to send email to someone but provided a name not an email address
-    this fucntion return a list of all available contact in the database so you can aompare the name you got with the list of names here 
+    this fucntion return a list of all available contact in the database so you can compare the name you got with the list of names here 
     to get the associated email
 
     for example : "send email to ahmed"
@@ -49,7 +49,7 @@ def add_new_contact(name,email):
 
 
 @tool
-def send_email(to, subject, body,is_approved:False):
+def send_email(to, subject, body,is_approved=False):
     """
     Never Send any email before make a draft and shoe it to the user and the user must agree to send it 
     

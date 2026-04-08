@@ -26,4 +26,5 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view()),
     path('chat/',include('chat.urls')),
     path('hotels/',include('Hotels.urls')),
+    path('sending_emails/',include('sending_emails.urls')),
 ]

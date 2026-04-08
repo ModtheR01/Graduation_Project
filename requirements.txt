@@ -94,7 +94,6 @@ opentelemetry-semantic-conventions==0.59b0
 orjson==3.11.4
 ormsgpack==1.11.0
 overrides==7.7.0
-packaging==26.0
 pandas==2.3.3
 pillow==12.1.1
 posthog==5.4.0
@@ -153,7 +152,7 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 tzdata==2025.3
 uritemplate==4.2.0
-urllib3==2.6.3
+urllib3>=1.24.2,<2.4.0 
 uvicorn==0.38.0
 watchdog==6.0.0
 watchfiles==1.1.1
