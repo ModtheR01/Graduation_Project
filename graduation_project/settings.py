@@ -124,6 +124,14 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://romee.up.railway.app/",
+    "https://romee-lake.vercel.app/",
+]
+
+CSRF_COOKIE_SECURE = True # ensure CSRF cookie is only sent over HTTPS
+SESSION_COOKIE_SECURE = True # ensure session cookie is only sent over HTTPS
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
