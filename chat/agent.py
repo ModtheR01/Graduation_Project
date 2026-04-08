@@ -1,4 +1,4 @@
-from langchain.agents import create_agent
+from langchain.agents import create_react_agent
 from langchain_openai import ChatOpenAI
 from .AI_models import default_model
 from .api_keys import OPENROUTER_KEY
@@ -17,7 +17,7 @@ llm = ChatOpenAI(
 )
 #[send_email, search_in_contact ,add_new_contact,create_todo,delete_todo,set_state_true,get_all_todo_items,search_for_flights,flight_order]
 # TODO adding the rest of the tools
-agent = create_agent(llm)
+agent = create_react_agent(llm, tools=[])
 #agent = create_agent(llm,[search_for_flights])
 print("agent created ....")
 
