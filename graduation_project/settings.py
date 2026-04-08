@@ -125,8 +125,8 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://romee.up.railway.app/",
-    "https://romee-lake.vercel.app/",
+    "https://romee.up.railway.app",
+    "https://romee-lake.vercel.app",
 ]
 
 CSRF_COOKIE_SECURE = True # ensure CSRF cookie is only sent over HTTPS
