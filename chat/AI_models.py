@@ -9,11 +9,12 @@ models={
     "gemini2"     :"google/gemini-2.0-flash-exp:free",
     "deepseek02"   :"tngtech/deepseek-r1t2-chimera:free",
     "Sherlock"    :"openrouter/sherlock-think-alpha",
-    "SetupFun"    :     'stepfun/step-3.5-flash:free'
+    "SetupFun"    :     'stepfun/step-3.5-flash:free',
+    "Gemma4"     :       "google/gemma-4-31b-it:free"
 
 }
 
-default_model=models["SetupFun"]
+default_model=models["Llama4"]
 #default_model=models["Sherlock"]
 
 # chat by2ol eno a7san 3l4an by3tmd 3la 70 parameter 
