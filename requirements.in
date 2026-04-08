@@ -19,3 +19,5 @@ dj-database-url
 
 packaging<25
 urllib3<2.4
+
+stripe
