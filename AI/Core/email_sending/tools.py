@@ -2,33 +2,37 @@ from Core.email_sending.utils import get_gmail_service
 from email.mime.text import MIMEText
 import base64
 from langchain_core.tools import tool
-from Core.email_sending.mock_contact import contact_list
-
-# basic tools that will change with addotion of db
+from sending_emails.utils import get_all_contacts ,add_contact
+from .utils import is_email_valid
 
 @tool
-def search_in_contact():
+def search_in_contact(request):
     """
     use this tools whenever user want to send email to someone but provided a name not an email address
     this fucntion return a list of all available contact in the database so you can compare the name you got with the list of names here 
     to get the associated email
 
+    this tool will provide you with the list of contacts of the user
+
+    parameters: 
+    request: the request object to get the user email and search for his contacts in the db
+    (send it as is from the frontend without extracting any data from it the function will handle that)
+
     for example : "send email to ahmed"
 
-    return example: [{"name":"ahmed","email":"ahmed@example.com"},{"name":"modather","email":"modatherosama@gmail.com"}]
+    return example: [{"name":"ahmed","email":"ahmed@example.com"},{"name":"modather","email":"modatherosama@example.com"}]
 
     if the name is not found in the db tell the user to provide the email again and its associated name and save it by calling the function add_new_contact from your tools
     """
-    # TODO actual contact retrieval from db
-    list_contact=[]
-    for contact in contact_list:
-        list_contact.append({"name":contact["name"],"email":contact["email"]})
-    print("done searching returning list of contact...")
-    return list_contact
-
+    try :
+        list_contact = get_all_contacts(request)
+        return list_contact
+    except:
+        print("Error occurred while fetching contacts")
+        return "tell the user there is currently a proplem with fetching his contacts, please try again later or add the contact you want to send email to manually from the dashboard"
 
 @tool
-def add_new_contact(name,email):
+def add_new_contact(request, name, email):
     """
     use this tools whenever user want to save new contact by providing "email_address" and "name"
 
@@ -36,15 +40,14 @@ def add_new_contact(name,email):
     email: the new email address the user want to save 
     name : the name associated with the email contact in db
 
-    this fucntion doesnt return anything so act as if it is already added 
-
+    this fucntion return the new contact
     for example : "save this contact anas.say3d@gmail.com under name anas"
 
     """
-    # TODO: validate email , name
-    # TODO: store the actual data in the DB
-    contact_list.append({"id":contact_list[-1]["id"]+1,"name":name,"email":email})
-    print(contact_list)
+    is_email_valid(email)
+    new_contact = add_contact(request,name,email)
+    print(new_contact)
+    return new_contact
 
 
 

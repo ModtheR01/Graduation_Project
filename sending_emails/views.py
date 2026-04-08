@@ -56,7 +56,6 @@ def contact_delete(request, pk):
     contact.delete()
     return Response(status=204)
 
-# functions for the ai function call
-# to do 
 
-
+# functions(not endpoints) for the ai tool to call will be in the utils file to be called by the ai when needed and these functions will interact with the database and return the needed data to the ai to make decisions based on it
+  
