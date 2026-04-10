@@ -82,10 +82,6 @@ class OAuthHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b"Authorization success! You can close this tab and go back to your terminal.")
 
-    # Disable noisy logging in console because SimpleHTTPRequestHandler by default logs every request (IP, path, etc.) to the console
-    def log_message(self, format, *args):
-        return
-
 
 def run_local_server():
     """
@@ -116,7 +112,7 @@ def exchange_code_for_tokens(code: str):
         "client_secret": GOOGLE_CLIENT_SECRET,
         "redirect_uri": GOOGLE_REDIRECT_URI,
         "grant_type": "authorization_code", #tells Google we’re doing the standard code exchange.
-        # we can set it to refresh_token --> se an existing refresh token to get a new access token 
+        # we can set it to refresh_token --> use an existing refresh token to get a new access token 
         # and many more grant types that tells google what are we exchanging the code for
     }
 
@@ -144,37 +140,37 @@ def save_tokens(token_data: dict):
     print(f"tokens:{token_data}")
 
 
-def main():
-    # 1) Build the Google OAuth URL
-    auth_url = build_auth_url()
-    print("[OAuth] Open this URL in your browser (if it doesn't open automatically):")
-    print(auth_url)
-    print()
+# def main():
+#     # 1) Build the Google OAuth URL
+#     auth_url = build_auth_url()
+#     print("[OAuth] Open this URL in your browser (if it doesn't open automatically):")
+#     print(auth_url)
+#     print()
 
-    # 2) Try to open the browser automatically
-    webbrowser.open(auth_url)
+#     # 2) Try to open the browser automatically
+#     webbrowser.open(auth_url)
 
-    # 3) Start local server and wait for Google to redirect with ?code=...
-    run_local_server()
+#     # 3) Start local server and wait for Google to redirect with ?code=...
+#     run_local_server()
 
-    # 4) After redirect, the handler should have stored the code
-    if not OAuthHandler.code_received:
-        print("[OAuth] No code received. Did you approve the consent screen?")
-        return
+#     # 4) After redirect, the handler should have stored the code
+#     if not OAuthHandler.code_received:
+#         print("[OAuth] No code received. Did you approve the consent screen?")
+#         return
 
-    code = OAuthHandler.code_received
-    print(f"[OAuth] Got authorization code: {code[:10]}...")
+#     code = OAuthHandler.code_received
+#     print(f"[OAuth] Got authorization code: {code[:10]}...")
 
-    # 5) Exchange code for tokens
-    token_data = exchange_code_for_tokens(code)
-    print("[OAuth] Received tokens from Google:")
-    print(json.dumps(token_data, indent=2))
+#     # 5) Exchange code for tokens
+#     token_data = exchange_code_for_tokens(code)
+#     print("[OAuth] Received tokens from Google:")
+#     print(json.dumps(token_data, indent=2))
 
-    # 6) Save tokens to file
-    save_tokens(token_data)
+#     # 6) Save tokens to file
+#     save_tokens(token_data)
 
-    print("[OAuth] Setup complete. You won't need to do this often.")
+#     print("[OAuth] Setup complete. You won't need to do this often.")
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

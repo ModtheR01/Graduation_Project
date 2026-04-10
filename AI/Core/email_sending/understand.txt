@@ -1,0 +1,37 @@
+# diffrence between test flow and production
+# below is the steps of how the code will work in production 
+# the flow will be simplified at the end of the file bas understand eletnen law mnzlna4
+
+#### VVIP
+# dont forget to register the new railway host in the google api service to allow romee requests
+# dont forget to implement the refresh token flow and add it automaticaly to the flow 
+# edit the database to store the tokens (they should be encrypted first)
+# set the callback uri in the email sending view
+
+1) first we build the google oAuth url 
+--> this will be the url user login using his google account then approve on the conscent screen 
+--> this url takes (
+    GOOGLE_CLIENT_ID  --> the link that tells google its romee.com that is requesting this page
+    GOOGLE_REDIRECT_URI --> the callback url that google send otp-like Code* to it we will be called with get request
+    Scope --> what permessions we want the user to give us (only sending mails (we can also read if we want))
+    )
+*** Code --> we use it to get user access token, refresh token from google 
+Note --> this data is constant and got nothing to do with the test version (will also be implemented on prod)
+OAUTH_AUTH_URL --> this is the base google link used to build the full url (adding our data on top)
+
+2) excahnge the code for tokens 
+--> this function calls google and give it the code then through our callback url we get the user tokens 
+--> we will need to implement a refresh token fucntion also since in dev we used the access direct but it need to be automated 
+--> the refresh flow will be this same function as if we are excahnging code to token but with changin in parameters like granttype which tells google what action do we need to do
+--> this function uses ( Code , GOOGLE_CLIENT_ID , GOOGLE_CLIENT_SECRET , GOOGLE_REDIRECT_URI ) 
+OAUTH_TOKEN_URL --> this is the google link used to exchage code for tokens
+
+3) save tokens fucntion --> will save the tokens in the agread place (ask chat gpt what is best practice and where should i save it)
+
+
+the flow including the frontend /// hey chat gpt please review this flow and tell me if its right
+
+front end call our endpoint to intiate service --> we get the request ,build the url ,return it to front end so it show the conscent screen
+--> the user approve through the front end --> our callback uri recieve the code --> we send the code to google to exchage it with tokens -->
+google provide the tokens to us (here the callback uri is used for validation from google the uri google sent the code to need to be the same requesting for exchange)
+ --> we store the tokens 

@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'flights.apps.FlightsConfig',
     'Reminder.apps.ReminderConfig',
     'Hotels.apps.HotelsConfig',
+    'rest_framework',
 ]
 AUTH_USER_MODEL = "Users.User" #"app_name.model_name"
 
@@ -101,7 +102,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'graduation_project.wsgi.application'
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = ['*']
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://your-frontend.com",
+]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -148,7 +152,7 @@ DATABASES = {
     )
 }
 
-# Connection pooling and timeout settings
+#Connection pooling and timeout settings
 if 'default' in DATABASES:
     DATABASES['default']['OPTIONS'] = {
         'connect_timeout': 10,

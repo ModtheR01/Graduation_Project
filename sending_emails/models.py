@@ -1,6 +1,10 @@
 from django.db import models
 from Tasks.models import Tasks
 from Users.models import User
+from django.db import models
+from django.conf import settings
+from cryptography.fernet import Fernet
+import os
 
 # Create your models here.
 class Contacts(models.Model):
@@ -26,3 +30,44 @@ class Email(models.Model):
     class Meta:
         managed = True
         db_table = 'email'
+
+
+
+
+# the user tokens for sending emails :
+# 🔐 encryption setup
+FERNET_KEY = os.getenv("FERNET_KEY")  
+if not FERNET_KEY:
+    raise ValueError("FERNET_KEY is not set in the environment variables.")
+cipher = Fernet(FERNET_KEY.encode())
+
+
+class Tokens(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    access_token = models.TextField(blank=True, null=True)
+    refresh_token = models.TextField()
+
+    expiry = models.DateTimeField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # 🔐 encrypt before save
+    def save(self, *args, **kwargs):
+        if self.refresh_token and not self.refresh_token.startswith("gAAAA"):
+            self.refresh_token = cipher.encrypt(self.refresh_token.encode()).decode()
+    
+        if self.access_token and not self.access_token.startswith("gAAAA"):
+            self.access_token = cipher.encrypt(self.access_token.encode()).decode()
+
+        super().save(*args, **kwargs)
+
+    # 🔓 decrypt helpers
+    def get_refresh_token(self):
+        return cipher.decrypt(self.refresh_token.encode()).decode()
+
+    def get_access_token(self):
+        if not self.access_token:
+            return None
+        return cipher.decrypt(self.access_token.encode()).decode()
