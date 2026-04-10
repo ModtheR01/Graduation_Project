@@ -390,6 +390,99 @@ const followUpResponse = await fetch('http://localhost:8000/chat/chat/', {
 }
 ```
 
+### 1️⃣ Get All Contacts
+
+**Endpoint** : `http://localhost:8000/sending_emails/contact/`
+Method: GET
+
+Description: Retrieve all contacts.
+
+Authentication: ✅ Required (JWT Token)
+*Note : 403 error means the user isnt the owner of the data he is quering ***
+
+✅ Success Response (200 OK)
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "0123456789"
+  }
+]
+2️⃣ Create Contact
+
+Endpoint: http://localhost:8000/contact/create/
+Method: POST
+
+Description: Create a new contact.
+
+Authentication: ✅ Required (JWT Token)
+
+📥 Request Body
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "phone": "0123456789"
+}
+✅ Success Response (201 Created)
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john@example.com",
+  "phone": "0123456789"
+}
+❌ Error Response (400 Bad Request)
+{
+  "email": ["This field is required."]
+}
+3️⃣ Update Contact
+
+Endpoint: http://localhost:8000/contact/update/<id>/
+Method: PUT
+
+Description: Update an existing contact.
+
+Authentication: ✅ Required (JWT Token)
+
+📥 Request Body
+{
+  "name": "Updated Name",
+  "email": "updated@example.com",
+  "phone": "0100000000"
+}
+✅ Success Response (200 OK)
+{
+  "id": 1,
+  "name": "Updated Name",
+  "email": "updated@example.com",
+  "phone": "0100000000"
+}
+❌ Error Responses
+
+Not Found (404):
+
+{}
+
+Validation Error (400):
+
+{
+  "email": ["Enter a valid email address."]
+}
+4️⃣ Delete Contact
+
+Endpoint: http://localhost:8000/contact/delete/<id>/
+Method: DELETE
+
+Description: Delete a contact.
+
+Authentication: ✅ Required (JWT Token)
+
+✅ Success Response (204 No Content)
+{}
+❌ Error Response (404 Not Found)
+{}
+
+
 ## 🛠️ Helper Functions
 
 ### JavaScript - Store and Use Tokens

@@ -8,7 +8,10 @@ from Core.email_sending.config import GOOGLE_CLIENT_ID , GOOGLE_CLIENT_SECRET
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
-from Core.email_sending.config import  GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, TOKENS_FILE
+from AI.Core.email_sending.config import  GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, TOKENS_FILE
+
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 
 
@@ -89,9 +92,19 @@ def refresh_access_token(token_data: Dict) -> Dict:
 }
     
 
+def is_email_valid(email):
+    try:
+        validate_email(email)
+        return True
+    except ValidationError:
+        return False
+
 #Returns an authenticated Gmail API service using saved tokens.json.
 # this service is like python wrapper it automate creating http request from headers and payload and parsing
 def get_gmail_service():
+
+    if TOKENS_FILE is None:
+        raise Exception("TOKENS_FILE not set")
     with open(TOKENS_FILE, "r") as f:
         token_data = json.load(f)
 

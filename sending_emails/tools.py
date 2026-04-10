@@ -1,4 +1,4 @@
-from Core.email_sending.utils import get_gmail_service
+from .utils import get_gmail_service
 from email.mime.text import MIMEText
 import base64
 from langchain_core.tools import tool
@@ -52,7 +52,7 @@ def add_new_contact(request, name, email):
 
 
 @tool
-def send_email(to, subject, body,is_approved=False):
+def send_email(request, to, subject, body, is_approved=False):
     """
     Never Send any email before make a draft and shoe it to the user and the user must agree to send it 
     
@@ -65,11 +65,12 @@ def send_email(to, subject, body,is_approved=False):
     - subject: short subject line summarizing the email's purpose
     - body: full message content to be included in the email body
     - is_approved: check if the user approved the drafted email before actually sending it
+    - request : the request object to get the user data send it as is wothout changing anything in it
 
     The tool does not return anything, but assumes the email is successfully sent.
     """
 
-    service = get_gmail_service()
+    service = get_gmail_service(request)
     
     # Create MIME email
     # telling the api the body is in plain text not html also createing the mime object to hold other data
@@ -98,3 +99,5 @@ def send_email(to, subject, body,is_approved=False):
 
     print("end of tool(send_email)...")
 
+
+# alter the database to add the task of sending email when the email is sent alter this function to be production ready

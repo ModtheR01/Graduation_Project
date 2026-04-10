@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'flights.apps.FlightsConfig',
     'Reminder.apps.ReminderConfig',
     'Hotels.apps.HotelsConfig',
+    'rest_framework',
 ]
 AUTH_USER_MODEL = "Users.User" #"app_name.model_name"
 
@@ -156,7 +157,7 @@ DATABASES = {
     )
 }
 
-# Connection pooling and timeout settings
+#Connection pooling and timeout settings
 if 'default' in DATABASES:
     DATABASES['default']['OPTIONS'] = {
         'connect_timeout': 10,
