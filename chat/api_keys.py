@@ -12,4 +12,4 @@ Deep_Seek_key=os.getenv("Deep_Seek_key")
 Stripe_Publishable=os.getenv("STRIPE_PUBLISHABLE")
 Stripe_Secret=os.getenv("STRIPE_SECRET")
 Stripe_Webhook_Secret=os.getenv("STRIPE_WEBHOOK_SECRET")
-
+XRapidAPIKey=os.getenv("XRapidAPIKey")

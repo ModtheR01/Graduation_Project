@@ -12,6 +12,9 @@ def send_message(request):
     chat_id = request.data.get('chat_id') # catch the chat_id will be sent by frontend developer in JSON 'in request' , if it not catched -> chat_id=none
     user_message = request.data.get('message') # catch the user message 
 
+    if not user_message:
+        return Response({"error": "Message is required"}, status=400)
+
     if not chat_id: # means that -> if chat_id = none -> create a new chat
         chat = Chats.objects.create(
             user_email=request.user,
@@ -28,18 +31,19 @@ def send_message(request):
         "role": "human",
         "content": user_message
     })
-
-    response = message_agent(chat.message) # it sends all chat to the agent
-
+    try:
+        response = message_agent(chat.message) # it sends all chat to the agent and receive the response from it
+    except Exception as e:
+        print(f"Agent error: {e}")  #show the error in the terminal to know what is the problem "For debugging only"
+        return Response({"error": "Agent failed, try again"}, status=500)
     chat.message.append({
         "role": "ai",
         "content": response
     })
-
     chat.save()
-
     return Response({
         "response": response,
-        "chat_id": chat.id
+        "chat_id": chat.id,
+        "messages": chat.message 
     })
 

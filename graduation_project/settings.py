@@ -102,12 +102,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'graduation_project.wsgi.application'
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "https://your-frontend.com",
-]
+CORS_ALLOW_ALL_ORIGINS  = True  
+CORS_ALLOW_CREDENTIALS  = True
 
-CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -127,6 +124,14 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://romee.up.railway.app",
+    "https://romee-lake.vercel.app",
+]
+
+CSRF_COOKIE_SECURE = True # ensure CSRF cookie is only sent over HTTPS
+SESSION_COOKIE_SECURE = True # ensure session cookie is only sent over HTTPS
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

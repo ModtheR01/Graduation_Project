@@ -39,7 +39,6 @@ def search_flights(origin, destination, date):
     }
     response=requests.get(search_url,headers=headers,params=params,timeout=30)
     response.raise_for_status()
-    #print(response.json())
     return response.json()
 
 def normalize_date(date_str: str) -> str:
