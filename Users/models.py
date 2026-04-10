@@ -2,18 +2,20 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager , AbstractBaseUser , PermissionsMixin
 
 class UserManager(BaseUserManager): # our manager 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email, password=None, phone_number=None, **extra_fields):
         if not email:
             raise ValueError("Users must have an email address")
+        if not phone_number:
+            raise ValueError("Users must have a phone number") # because we set it as required field in our model
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=email, phone_number=phone_number, **extra_fields)
         user.set_password(password) # hash the password
         user.save(using=self._db)
         return user
-    def create_superuser(self, email, password=None, **extra_fields):  #this function must has this name because when we will create a superuser we will use it in terminal 'python manage.py createsuperuser'
+    def create_superuser(self, email, password=None, phone_number=None, **extra_fields):  #this function must has this name because when we will create a superuser we will use it in terminal 'python manage.py createsuperuser'
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        return self.create_user(email, password, **extra_fields)
+        return self.create_user(email, password, phone_number, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin): # this class must inherit from AbstractBaseUser and PermissionsMixin to tell django that 'this table has login and permissions ,....' and [AbstractBaseUser provides the core authentication logic (password hashing, login handling),but leaves user fields and structure fully customizable (e.g., use email instead of username).]
     email = models.EmailField(primary_key=True)
@@ -32,7 +34,7 @@ class User(AbstractBaseUser, PermissionsMixin): # this class must inherit from A
 
     objects = UserManager() # makes 'objects' use our manager
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["phone_number"] # this field will be required when we create superuser from terminal
 
     class Meta:
         managed = True
