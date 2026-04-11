@@ -84,16 +84,13 @@ def search_flights(origin: str, destination: str, date: str):
 
     response = requests.get(url, headers=HEADERS, params=params)
     data = response.json()
-
-
+    flights = []
 
     for item in data.get("itineraries", [])[:5]:
         leg = item["legs"][0]
-
         # 🧠 تحويل duration
         hours = leg["durationMinutes"] // 60
         minutes = leg["durationMinutes"] % 60
-        flights = []
         flights.append({
             "route": f"{origin} → {destination}",
             "time": f"{leg['departure'][11:16]} → {leg['arrival'][11:16]}",
