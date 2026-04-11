@@ -28,7 +28,7 @@ def send_message(request):
         )
 
     chat.message.append({
-        "role": "human",
+        "role": "user",
         "content": user_message
     })
     try:
@@ -37,7 +37,7 @@ def send_message(request):
         print(f"Agent error: {e}")  #show the error in the terminal to know what is the problem "For debugging only"
         return Response({"error": "Agent failed, try again"}, status=500)
     chat.message.append({
-        "role": "ai",
+        "role": "assistant",
         "content": response
     })
     chat.save()
