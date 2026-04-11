@@ -10,6 +10,7 @@ HEADERS = {
 
 def get_place_id(query: str):
     print("in get place id")
+    print("XRapidAPIKey:", XRapidAPIKey)
     url = "https://skyscanner-flights-travel-api.p.rapidapi.com/flights/searchAirport"
 
     params = {
@@ -113,8 +114,8 @@ def search_flights(origin: str, destination: str, date: str):
     return f"[FINAL_ANSWER]\n{flights_text.strip()}"
 
 
-if __name__ == "__main__":
-    print(search_flights("Cairo", "Riyadh", "2026-05-10"))
+# if __name__ == "__main__":
+#     print(search_flights("Cairo", "Riyadh", "2026-05-10"))
 
 # @tool
 # def search_anywhere(origin: str):
