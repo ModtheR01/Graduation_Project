@@ -1,3 +1,5 @@
+from urllib import response
+
 import requests
 from langchain_core.tools import tool
 from flights.state_store import get_store
@@ -18,8 +20,10 @@ def get_place_id(query: str):
         "market": "US",
         "locale": "en-US"
     }
-
+    print("calling flights API...")
     response = requests.get(url, headers=HEADERS, params=params)
+    print("status code:", response.status_code)
+    print("response:", response.text[:500])
     data = response.json()
 
     places = data.get("places", [])
