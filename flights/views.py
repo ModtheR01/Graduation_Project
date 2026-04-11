@@ -9,6 +9,7 @@ HEADERS = {
 }
 
 def get_place_id(query: str):
+    print("in get place id")
     url = "https://skyscanner-flights-travel-api.p.rapidapi.com/flights/searchAirport"
 
     params = {
@@ -38,7 +39,7 @@ def get_place_id(query: str):
         city = next((p for p in places if p["placeType"] == "CITY"), None)
         airport = next((p for p in places if p["placeType"] == "AIRPORT"), None)
         best = city if city else airport
-
+    print(f"get_place_id('{query}') -> {best['name']} ({best['skyId']})")
     return {
         "skyId": best["skyId"],
         "entityId": best["entityId"]
