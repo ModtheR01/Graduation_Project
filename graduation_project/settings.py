@@ -136,33 +136,33 @@ SESSION_COOKIE_SECURE = True # ensure session cookie is only sent over HTTPS
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'personal_agent',
-#         'USER': 'postgres',
-#         'PASSWORD': '123456',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
-import dj_database_url
-
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'personal_agent',
+        'USER': 'postgres',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
 }
 
-#Connection pooling and timeout settings
-if 'default' in DATABASES:
-    DATABASES['default']['OPTIONS'] = {
-        'connect_timeout': 10,
-        'options': '-c statement_timeout=30000'
-    }
+# import dj_database_url
+
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=os.getenv('DATABASE_URL'),
+#         conn_max_age=600,
+#         conn_health_checks=True,
+#     )
+# }
+
+# #Connection pooling and timeout settings
+# if 'default' in DATABASES:
+#     DATABASES['default']['OPTIONS'] = {
+#         'connect_timeout': 10,
+#         'options': '-c statement_timeout=30000'
+#     }
 
 
 
