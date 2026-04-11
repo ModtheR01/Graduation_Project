@@ -108,11 +108,12 @@ def search_flights(origin: str, destination: str, date: str):
         {f['price']}
         {stops}
         """
+    print("TOOL RESULT:", flights_text)
     return f"[FINAL_ANSWER]\n{flights_text.strip()}"
 
 
-# if __name__ == "__main__":
-#     print(search_flights("Cairo", "Riyadh", "2026-05-10"))
+if __name__ == "__main__":
+    print(search_flights("Cairo", "Riyadh", "2026-05-10"))
 
 # @tool
 # def search_anywhere(origin: str):
