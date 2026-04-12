@@ -1,69 +1,29 @@
 from urllib import response
-
 import requests
 from langchain_core.tools import tool
 from flights.state_store import get_store
 from chat.api_keys import XRapidAPIKey
+from .utilities import get_place_id
 print("in views")
 HEADERS = {
     "x-rapidapi-key": XRapidAPIKey,
     "x-rapidapi-host": "skyscanner-flights-travel-api.p.rapidapi.com"
 }
 
-def get_place_id(query: str):
-    print("in get place id")
-    print("XRapidAPIKey:", XRapidAPIKey)
-    url = "https://skyscanner-flights-travel-api.p.rapidapi.com/flights/searchAirport"
-
-    params = {
-        "query": query,
-        "market": "US",
-        "locale": "en-US"
-    }
-    print("calling flights API...")
-    response = requests.get(url, headers=HEADERS, params=params)
-    print("status code:", response.status_code)
-    print("response:", response.text[:500])
-    data = response.json()
-
-    places = data.get("places", [])
-
-    if not places:
-        return None
-
-    # 🎯 exact match الأول
-    exact = next(
-        (p for p in places if p["name"].lower() == query.lower()),
-        None
-    )
-
-    if exact:
-        best = exact
-    else:
-        # fallback
-        city = next((p for p in places if p["placeType"] == "CITY"), None)
-        airport = next((p for p in places if p["placeType"] == "AIRPORT"), None)
-        best = city if city else airport
-    print(f"get_place_id('{query}') -> {best['name']} ({best['skyId']})")
-    return {
-        "skyId": best["skyId"],
-        "entityId": best["entityId"]
-    }
-
 
 @tool
 def search_flights(origin: str, destination: str, date: str):
     """
     Search for available flights between two cities on a given date.
-    🔹 Input Rules:
-    - origin: departure city name (ANY language is allowed).
-        → The system MUST convert it to English before processing.
-    - destination: arrival city name (ANY language is allowed).
-        → The system MUST convert it to English before processing.
-    - date: travel date in format YYYY-MM-DD.
-    🔹 Important Notes:
-    - Always assume user input may be misspelled or not in English.
-    🔹 Output Rules (STRICT FORMAT):
+    Input Rules:
+        origin: departure city name (ANY language is allowed), if the user doesn't mention the name of city and mention the name of nation, you can use the nation's capital as the origin city.
+            The system MUST convert it to English before processing.
+        destination: arrival city name (ANY language is allowed), if the user doesn't mention the name of city and mention the name of nation, you can use the nation's capital as the origin city.
+            The system MUST convert it to English before processing.
+        date: travel date in format YYYY-MM-DD , if the user provides it in another format, convert it to the required format before processing.
+    Important Notes:
+        Always assume user input may be misspelled or not in English.
+    Output Rules (STRICT FORMAT):
         You MUST call the tool and return its response as-is.
         If the tool output starts with [FINAL_ANSWER], you MUST return everything after it exactly as-is.
     """
