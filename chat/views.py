@@ -54,7 +54,7 @@ def send_message(request):
         "role": "assistant",
         "content": response
     })
-    chat.save()
+    Chats.objects.filter(id=chat.id).update(message=chat.message)
     return Response({
         "response": response,
         "chat_id": chat.id,

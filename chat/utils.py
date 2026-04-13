@@ -20,11 +20,11 @@ def generate_title(user_message,chat_id,user_email):
     print("Generating title for message:", user_message)
     response = title_model.invoke(messages).content.strip()
     print("Generated title:", response)
-    Chats.objects.filter(
+    updated = Chats.objects.filter(
         id=chat_id,
         user_email=user_email
     ).update(title=response)
-
+    print(updated, "chat updated with title")
     return response if response else "New Chat"
 
 models_list=["google/gemma-4-31b-it:free","google/gemma-4-26b-a4b-it:free","nvidia/nemotron-3-super-120b-a12b:free"]
