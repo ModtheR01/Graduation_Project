@@ -49,13 +49,14 @@ def send_message(request):
     except Exception as e:
         print(f"Agent error: {e}")
         return Response({"error": "Agent failed, try again"}, status=500)
-
-
-    messages = chat.message or []
-    messages.append({
+    
+    chat.message.append({
         "role": "assistant",
         "content": response
     })
-
-    chat.message = messages
     chat.save()
+    return Response({
+        "response": response,
+        "chat_id": chat.id,
+        "messages": chat.message 
+    })
