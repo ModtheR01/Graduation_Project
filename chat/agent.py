@@ -23,4 +23,3 @@ def message_agent(chat_messages):
         messages["messages"].append((msg["role"], msg["content"]))
     response = agent.invoke(messages)["messages"][-1].content
     return response if response else "Sorry, I am a bit confused. Can you rephrase?"
-

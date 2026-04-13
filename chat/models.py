@@ -1,5 +1,8 @@
+import threading
+
 from django.db import models
 from Users.models import User
+from .utils import generate_title
 
 
 class Chats(models.Model):
@@ -11,3 +14,18 @@ class Chats(models.Model):
     class Meta:
         managed = True
         db_table = 'chats'
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+    
+        super().save(*args, **kwargs)
+    
+        if is_new and not self.title:
+            def generate():
+                title = generate_title(self.message["user"])
+                self.title = title
+                self.save(update_fields=["title"])
+    
+            threading.Thread(target=generate).start()
+
+message_example = {"user":"message"}
