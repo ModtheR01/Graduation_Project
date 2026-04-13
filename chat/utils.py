@@ -1,10 +1,12 @@
+import os
+
 from langchain_openai import ChatOpenAI
 from .models import Chats
 from django.shortcuts import get_object_or_404
 
 title_model = ChatOpenAI(
     model="nvidia/nemotron-3-super-120b-a12b:free",
-    api_key='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',
+    api_key=os.getenv("OpenRouter_key"),
     base_url="https://openrouter.ai/api/v1",
     streaming=False,
     temperature=0.4,
