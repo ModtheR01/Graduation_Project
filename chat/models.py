@@ -17,15 +17,18 @@ class Chats(models.Model):
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
-    
-        super().save(*args, **kwargs)
-    
-        if is_new and not self.title:
-            def generate():
-                title = generate_title(self.message["user"])
-                self.title = title
-                self.save(update_fields=["title"])
-    
-            threading.Thread(target=generate).start()
 
-message_example = {"user":"message"}
+        super().save(*args, **kwargs)
+
+        if is_new and not self.title and self.message:
+            def generate(chat_id, message):
+                user_message = message[0]["content"]
+
+                title = generate_title(user_message)
+
+                # update بدون ما ننادي save تاني
+                Chats.objects.filter(pk=chat_id).update(title=title)
+
+            threading.Thread(target=generate, args=(self.pk, self.message)).start()
+
+message_example = [{"role":"user","content":"Hello!"}]

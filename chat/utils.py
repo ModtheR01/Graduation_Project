@@ -8,9 +8,14 @@ title_model = ChatOpenAI(
     temperature=0.4,
 )
 
-def generate_title(message):
-    messages = {"messages": [("system", system_prompt),("human", message)]}
+def generate_title(user_message):
+    messages = [
+        ("system", system_prompt),
+        ("human", user_message),
+    ]
+
     response = title_model.invoke(messages).content.strip()
+
     return response if response else "New Chat"
 
 models_list=["google/gemma-4-31b-it:free","google/gemma-4-26b-a4b-it:free","nvidia/nemotron-3-super-120b-a12b:free"]
