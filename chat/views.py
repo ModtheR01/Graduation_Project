@@ -43,8 +43,8 @@ async def send_message(request):
 
     try:
         if not chat_id: 
-            Thread(target=generate_title, args=(chat.id, user_message)).start() # generate title in a separate thread to avoid blocking the main thread
-            
+            Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
+
         response = message_agent(chat.message)
     except Exception as e:
         print(f"Agent error: {e}")
