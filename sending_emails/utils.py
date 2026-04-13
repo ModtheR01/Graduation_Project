@@ -3,8 +3,8 @@ import urllib.parse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 import requests
-from django.utils import timezone
-from datetime import datetime
+from django.utils import timezone as tz
+from datetime import datetime, timezone
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from .models import Contacts , Tokens
@@ -121,7 +121,7 @@ def get_valid_access_token(user):
     token_obj = Tokens.objects.get(user=user)
 
     # لو لسه valid
-    if token_obj.expiry > timezone.now():
+    if token_obj.expiry > tz.now():
         return token_obj.get_access_token()
 
     # ❌ expired → نعمل refresh
@@ -145,7 +145,7 @@ def get_valid_access_token(user):
 
     # update DB
     token_obj.access_token = new_access_token
-    token_obj.expiry = timezone.now() + timezone.timedelta(seconds=expires_in - 60)
+    token_obj.expiry = tz.now() + tz.timedelta(seconds=expires_in - 60)
     token_obj.save()
 
     return new_access_token
