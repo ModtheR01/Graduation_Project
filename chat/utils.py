@@ -18,13 +18,10 @@ def generate_title(user_message,chat_id,user_email):
     print("Generating title for message:", user_message)
     response = title_model.invoke(messages).content.strip()
     print("Generated title:", response)
-    chat = get_object_or_404(
-            Chats,
-            id=chat_id,
-            user_email=user_email
-        )
-    chat.title = response
-    chat.save()
+    Chats.objects.filter(
+        id=chat_id,
+        user_email=user_email
+    ).update(title=response)
 
     return response if response else "New Chat"
 

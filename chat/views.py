@@ -10,7 +10,7 @@ from threading import Thread
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated]) # make  the end point allowed to authenticated users
-async def send_message(request):
+def send_message(request):
     chat_id = request.data.get('chat_id') # catch the chat_id will be sent by frontend developer in JSON 'in request' , if it not catched -> chat_id=none
     user_message = request.data.get('message') # catch the user message 
 
