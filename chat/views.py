@@ -15,13 +15,11 @@ def send_message(request):
     if not user_message:
         return Response({"error": "Message is required"}, status=400)
 
+
     if not chat_id: # means that -> if chat_id = none -> create a new chat
         chat = Chats.objects.create(
             user_email=request.user,
-            message=[{
-        "role": "user",
-        "content": user_message
-    }]
+            message=[]
         )
     else:
         chat = get_object_or_404(
@@ -30,6 +28,10 @@ def send_message(request):
             user_email=request.user # to be sure this chat owned by this user
         )
 
+    chat.message.append({
+        "role": "user",
+        "content": user_message
+    })
     try:
         response = message_agent(chat.message) # it sends all chat to the agent and receive the response from it
     except Exception as e:

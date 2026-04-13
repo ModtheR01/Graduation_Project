@@ -15,6 +15,7 @@ def generate_title(user_message):
     ]
     print("Generating title for message:", user_message)
     response = title_model.invoke(messages).content.strip()
+    print("Generated title:", response)
 
     return response if response else "New Chat"
 
