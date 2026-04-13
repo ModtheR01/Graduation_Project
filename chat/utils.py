@@ -30,25 +30,19 @@ def generate_title(user_message,chat_id,user_email):
 models_list=["google/gemma-4-31b-it:free","google/gemma-4-26b-a4b-it:free","nvidia/nemotron-3-super-120b-a12b:free"]
 
 system_prompt ="""
-                RULES:
-                - YOU CAN GENERATE ONLY ONE TITLE PER REQUEST ONLY ONE!
-                - Generate a short, natural-sounding chat title (max 8 words).
-                - if you got a inappropriate content generate a title that indicates that without being explicit like "inappropriate content" or "content not allowed" 
-                - dont ever generate an empty title or a message to user title as there will be no one to read it it will be directly stored in the db so you need to work your way around it
-                - make sure the title is in the same language the user used 
-                
-                The title should:
-                - sound like a real conversation topic
-                - summarize the main intent only
-                - ignore extra details like dates unless very important
-                - be clean and readable
+Generate a short chat title (max 5 words).
 
-                Bad example:
-                "book flight cairo paris december 20 suggestions paris sites"
-                "email create contact john details"
+Focus ONLY on the main intent.
+Make it sound like a real app title.
 
-                Good examples:
-                "Trip to Paris Planning"
-                "Flight and Paris Travel Ideas"
-                "new contact creation for john"
+Do NOT:
+- repeat the input
+- include unnecessary details
+- write a sentence
+
+HOW to get the correct title:
+Step 1: Identify the main intent of the message.
+Step 2: Generate a short title (max 5 words) based on that intent.
+
+Return ONLY the title.
                 """
