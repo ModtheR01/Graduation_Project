@@ -17,13 +17,13 @@ class Chats(models.Model):
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
-
+        print("Saving chat with message:", self.message)
         super().save(*args, **kwargs)
 
         if is_new and not self.title and self.message:
             def generate(chat_id, message):
                 user_message = message[0]["content"]
-
+                print("Generating title for new chat with message:", user_message)
                 title = generate_title(user_message)
 
                 # update بدون ما ننادي save تاني

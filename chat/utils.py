@@ -13,7 +13,7 @@ def generate_title(user_message):
         ("system", system_prompt),
         ("human", user_message),
     ]
-
+    print("Generating title for message:", user_message)
     response = title_model.invoke(messages).content.strip()
 
     return response if response else "New Chat"
