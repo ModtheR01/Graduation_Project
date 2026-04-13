@@ -13,7 +13,7 @@ from threading import Thread
 def send_message(request):
     chat_id = request.data.get('chat_id') # catch the chat_id will be sent by frontend developer in JSON 'in request' , if it not catched -> chat_id=none
     user_message = request.data.get('message') # catch the user message 
-
+    print("user",request.user)
     if not user_message:
         return Response({"error": "Message is required"}, status=400)
 
