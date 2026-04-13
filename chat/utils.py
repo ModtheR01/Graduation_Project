@@ -1,4 +1,6 @@
 from langchain_openai import ChatOpenAI
+from .models import Chats
+from django.shortcuts import get_object_or_404
 
 title_model = ChatOpenAI(
     model="nvidia/nemotron-3-super-120b-a12b:free",
@@ -8,7 +10,7 @@ title_model = ChatOpenAI(
     temperature=0.4,
 )
 
-def generate_title(user_message):
+def generate_title(user_message,chat_id,user_email):
     messages = [
         ("system", system_prompt),
         ("human", user_message),
@@ -16,6 +18,13 @@ def generate_title(user_message):
     print("Generating title for message:", user_message)
     response = title_model.invoke(messages).content.strip()
     print("Generated title:", response)
+    chat = get_object_or_404(
+            Chats,
+            id=chat_id,
+            user_email=user_email
+        )
+    chat.title = response
+    chat.save()
 
     return response if response else "New Chat"
 
