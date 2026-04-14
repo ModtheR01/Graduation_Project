@@ -65,14 +65,13 @@ def build_auth_url(user):
     if not sk:
         raise ValueError("FERNET_KEY environment variable is not set")
     print("user:", user)
-    print("user.id:", user.id)
-    print("type user.id:", type(user.id))
+    print("type user.id:", type(user))
     print("TEST JWT START")
 
     test = jwt.encode({"test": 1}, "test123", algorithm="HS256")
 
     print("TEST JWT RESULT:", test)
-    encoded_user =jwt.encode({"user_id": user.id}, sk, algorithm="HS256")
+    encoded_user =jwt.encode({"user_id": user}, sk, algorithm="HS256")
     print("encoded_user:", encoded_user)
     params = {
         "client_id": GOOGLE_CLIENT_ID,
