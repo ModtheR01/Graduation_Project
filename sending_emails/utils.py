@@ -112,7 +112,7 @@ def exchange_code_for_tokens(code: str):
     return token_data
 
 def save_tokens(user_id, token_data: dict):
-    user = User.objects.get(id=user_id)
+    user = User.objects.get(pk=user_id)
 
 
     access_token = token_data.get("access_token")
