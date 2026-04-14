@@ -8,7 +8,7 @@ from django.utils import timezone as tz
 from datetime import datetime, timezone
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-
+from django.shortcuts import redirect
 from Users.models import User
 from .models import Contacts , Tokens
 import os
@@ -122,7 +122,7 @@ def save_tokens(user_id, token_data):
     if not refresh_token or not expiry_datetime:
         raise ValueError("No refresh token or expiry time returned from Google")
     if Tokens.objects.filter(user=user).exists():
-        raise ValueError("Tokens for this user already exist")
+        return redirect("https://romee-lake.vercel.app/")
     token_obj = Tokens(
         user_id=user,
         access_token=access_token,
