@@ -9,6 +9,8 @@ from rest_framework.response import Response
 @api_view(['POST'])
 @permission_classes([IsAuthenticated]) # make  the end point allowed to authenticated users
 def send_message(request):
+
+    flag = 0
     chat_id = request.data.get('chat_id') # catch the chat_id will be sent by frontend developer in JSON 'in request' , if it not catched -> chat_id=none
     user_message = request.data.get('message') # catch the user message 
 
@@ -18,19 +20,25 @@ def send_message(request):
     if not chat_id: # means that -> if chat_id = none -> create a new chat
         chat = Chats.objects.create(
             user_email=request.user,
-            message=[]
+            message=[
+                {"role": "user","content": user_message}
+            ]
         )
+        flag = 1
     else:
         chat = get_object_or_404(
             Chats,
-            id=chat_id, # to catch a specific chat
-            user_email=request.user # to be sure this chat owned by this user
+            id=chat_id,     # to catch a specific chat
+            user_email=request.user  # to be sure this chat owned by this user
         )
+    
+    if flag==0:
+        chat.message.append({
+            "role": "user",
+            "content": user_message
+        })
 
-    chat.message.append({
-        "role": "user",
-        "content": user_message
-    })
+    chat.save()
     try:
         response = message_agent(chat.message) # it sends all chat to the agent and receive the response from it
     except Exception as e:

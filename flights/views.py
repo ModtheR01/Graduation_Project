@@ -11,23 +11,23 @@ HEADERS = {
 }
 
 
-# @tool
+@tool
 def search_flights(origin: str, destination: str, date: str):
-    # """
-    # Always communicate with the user in the same language they use, and respond in that language.
-    # Search for available flights between two cities on a given date.
-    # Input Rules:
-    #     origin: departure city name (ANY language is allowed), if the user doesn't mention the name of city and mention the name of nation, you can use the nation's capital as the origin city.
-    #         The system MUST convert it to English before processing.
-    #     destination: arrival city name (ANY language is allowed), if the user doesn't mention the name of city and mention the name of nation, you can use the nation's capital as the origin city.
-    #         The system MUST convert it to English before processing.
-    #     date: travel date in format YYYY-MM-DD , if the user provides it in another format, convert it to the required format before processing.
-    # Important Notes:
-    #     Always assume user input may be misspelled or not in English.
-    # Output Rules (STRICT FORMAT):
-    #     You MUST call the tool and return its response as-is.
-    #     If the tool output starts with [FINAL_ANSWER], you MUST return everything after it exactly as-is.
-    # """
+    """
+    Always communicate with the user in the same language they use, and respond in that language.
+    Search for available flights between two cities on a given date.
+    Input Rules:
+        origin: departure city name (ANY language is allowed), if the user doesn't mention the name of city and mention the name of nation, you can use the nation's capital as the origin city.
+            The system MUST convert it to English before processing.
+        destination: arrival city name (ANY language is allowed), if the user doesn't mention the name of city and mention the name of nation, you can use the nation's capital as the origin city.
+            The system MUST convert it to English before processing.
+        date: travel date in format YYYY-MM-DD , if the user provides it in another format, convert it to the required format before processing.
+    Important Notes:
+        Always assume user input may be misspelled or not in English.
+    Output Rules (STRICT FORMAT):
+        You MUST call the tool and return its response as-is.
+        If the tool output starts with [FINAL_ANSWER], you MUST return everything after it exactly as-is.
+    """
     print("in tool in views")
     origin_ids = get_place_id(origin)
     dest_ids = get_place_id(destination)
@@ -84,8 +84,8 @@ def search_flights(origin: str, destination: str, date: str):
     return f"[FINAL_ANSWER]\n{flights_text.strip()}"
 
 
-if __name__ == "__main__":
-    print(search_flights("Cairo", "Riyadh", "2026-05-10"))
+# if __name__ == "__main__":
+#     print(search_flights("Cairo", "Riyadh", "2026-05-10"))
 
 
 @tool
