@@ -122,12 +122,11 @@ def save_tokens(user_id, token_data):
         raise ValueError("No refresh token or expiry time returned from Google")
 
     token_obj = Tokens(
-        user_email=user,
+        user_id=user,
         access_token=access_token,
         refresh_token=refresh_token,
         expiry= datetime.fromtimestamp(expiry_datetime, tz=timezone.utc)
     )
-
     token_obj.save()
 
 def get_valid_access_token(user):
