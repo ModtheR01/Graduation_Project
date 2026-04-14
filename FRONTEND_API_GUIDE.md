@@ -1224,3 +1224,368 @@ if (response.status === 204) {
 ```
 
 # ...existing code...
+
+# ...existing code...
+
+### 7️⃣ Login with Google (OAuth 2.0)
+
+**Endpoint:** `https://romee.up.railway.app/Users/login/google/`
+
+**Method:** `POST`
+
+**Description:** Authenticate user with Google OAuth 2.0. Creates a new account automatically if the user doesn't exist.
+
+**Authentication:** ❌ Not required
+
+**Prerequisites:**
+1. User must have a Google account
+2. Frontend must handle Google OAuth flow and get authorization code
+3. Google API credentials must be configured in backend
+
+---
+
+## 🔑 How Google Login Works (Flow Diagram)
+
+```
+1. User clicks "Login with Google" button
+   ↓
+2. Frontend redirects to Google login page
+   ↓
+3. Google returns authorization CODE to your frontend
+   ↓
+4. Frontend sends CODE to backend (this endpoint)
+   ↓
+5. Backend exchanges CODE for Google tokens
+   ↓
+6. Backend verifies user identity with Google
+   ↓
+7. Backend creates/updates user in database
+   ↓
+8. Backend returns JWT access token
+   ↓
+9. Frontend stores JWT and user is logged in
+```
+
+---
+
+## 📝 Request Body
+
+```json
+{
+  "code": "4/0AX4XfWg1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7"
+}
+```
+
+**Field Details:**
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| code | string | ✅ | Authorization code from Google OAuth flow (valid for 10 minutes) |
+
+---
+
+## 🚀 Frontend Implementation Guide
+
+### Step 1: Install Google OAuth Library
+
+```bash
+npm install @react-oauth/google
+```
+
+### Step 2: Setup Google OAuth Provider (React Example)
+
+```javascript
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+export default function App() {
+  return (
+    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+      <YourComponents />
+    </GoogleOAuthProvider>
+  );
+}
+```
+
+### Step 3: Create Google Login Button Component
+
+```javascript
+import { useGoogleLogin } from '@react-oauth/google';
+
+export default function GoogleLoginButton() {
+  const login = useGoogleLogin({
+    onSuccess: (codeResponse) => handleGoogleLogin(codeResponse.code),
+    onError: (error) => console.log('Login Failed:', error),
+    flow: 'auth-code'  // Important: Get authorization code, not access token
+  });
+
+  const handleGoogleLogin = async (code) => {
+    try {
+      const response = await fetch('http://localhost:8000/Users/login/google/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store tokens
+        localStorage.setItem('accessToken', data.access);
+        localStorage.setItem('refreshToken', data.refresh);
+        
+        console.log(data.message);  // "Login Successfully"
+        console.log('Is new user:', data.is_new_user);
+        
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
+      } else {
+        console.error('Login error:', data.error);
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+    }
+  };
+
+  return (
+    <button onClick={() => login()}>
+      🔵 Login with Google
+    </button>
+  );
+}
+```
+
+### Step 4: Using the Official Google Button (Alternative)
+
+```javascript
+import { GoogleLogin } from '@react-oauth/google';
+
+export default function LoginPage() {
+  const handleSuccess = async (credentialResponse) => {
+    const code = credentialResponse.credential;  // This is the authorization code
+    
+    const response = await fetch('http://localhost:8000/Users/login/google/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ code })
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      localStorage.setItem('accessToken', data.access);
+      localStorage.setItem('refreshToken', data.refresh);
+      window.location.href = '/dashboard';
+    }
+  };
+
+  return (
+    <GoogleLogin
+      onSuccess={handleSuccess}
+      onError={() => console.log('Login Failed')}
+    />
+  );
+}
+```
+
+---
+
+## ✅ Success Response (200 OK)
+
+```json
+{
+  "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImpvaG5AZ21haWwuY29tIn0...",
+  "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ...",
+  "message": "Login Successfully",
+  "is_new_user": true
+}
+```
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| access | string | JWT access token (valid for 60 minutes) - Use this for API requests |
+| refresh | string | JWT refresh token (valid for 24 hours) - Use to get new access token |
+| message | string | Confirmation message |
+| is_new_user | boolean | `true` if new account was created, `false` if existing user |
+
+---
+
+## ❌ Error Responses
+
+### ❌ Missing Authorization Code (400 Bad Request)
+
+```json
+{
+  "error": "Code is required"
+}
+```
+
+**Solution:** Ensure Google OAuth flow completed and code was received.
+
+---
+
+### ❌ Failed Token Exchange (400 Bad Request)
+
+```json
+{
+  "error": "Failed to obtain token"
+}
+```
+
+**Possible Causes:**
+- Authorization code expired (only valid for 10 minutes)
+- Invalid redirect URI configured in Google Console
+- Google Client ID or Secret is incorrect
+
+**Solution:** 
+- Get a fresh authorization code by clicking login again
+- Verify Google Console OAuth settings match backend configuration
+
+---
+
+### ❌ ID Token Not Found (400 Bad Request)
+
+```json
+{
+  "error": "ID token not found"
+}
+```
+
+**Solution:** Ensure authorization code is valid and from Google.
+
+---
+
+### ❌ Invalid Google Token (400 Bad Request)
+
+```json
+{
+  "error": "Invalid Google token"
+}
+```
+
+**Possible Causes:**
+- Token signature doesn't match Google's public keys
+- Token expired
+- Token was issued for a different Google App
+
+**Solution:** Get a fresh authorization code from Google login.
+
+---
+
+### ❌ Email Not Provided by Google (400 Bad Request)
+
+```json
+{
+  "error": "Email not provided by Google"
+}
+```
+
+**Possible Causes:**
+- User's Google account has no email
+- User restricted email sharing in consent screen
+
+**Solution:** Ask user to use a valid Google account with email.
+
+---
+
+### ❌ Email Not Verified (400 Bad Request)
+
+```json
+{
+  "error": "Email not verified"
+}
+```
+
+**Possible Causes:**
+- User's Google account email is not verified by Google
+
+**Solution:** Ask user to verify their email in Google account settings.
+
+---
+
+## 🔐 What Happens Behind the Scenes
+
+1. **Frontend gets authorization code** from Google (via OAuth flow)
+2. **Frontend sends code to backend** (this endpoint)
+3. **Backend exchanges code for tokens** with Google
+4. **Backend verifies token** - ensures it's from Google and your app
+5. **Backend extracts user info** - email, name from Google
+6. **Backend checks if user exists**:
+   - ✅ **Exists:** Returns JWT tokens
+   - ❌ **Doesn't exist:** Creates new user automatically and returns JWT tokens
+7. **User is logged in** with JWT tokens
+
+---
+## ⚙️ Backend Configuration Required
+
+**Your backend should have these Google credentials configured in `chat/api_keys.py`:**
+
+```python
+AUTH_GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+AUTH_GOOGLE_CLIENT_SECRET = "YOUR_GOOGLE_CLIENT_SECRET"
+AUTH_GOOGLE_REDIRECT_URI = "http://localhost:3000/callback"
+```
+
+---
+
+## 🔄 After Successful Login
+
+**For New Users:**
+- Account is created automatically
+- User should complete their profile (First name, Last name, etc.)
+- Redirect to `/profile-setup` or similar
+
+**For Existing Users:**
+- User is logged in immediately
+- Redirect to `/dashboard`
+
+**Store tokens and use them:**
+
+```javascript
+// Get the access token
+const accessToken = localStorage.getItem('accessToken');
+
+// Use it in API requests
+const response = await fetch('http://localhost:8000/Users/user-info/', {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  }
+});
+```
+
+---
+
+## 📌 Important Notes
+
+✅ **Do's:**
+- Always use authorization code flow (`flow: 'auth-code'`)
+- Get fresh authorization code for each login attempt
+- Store JWT tokens securely (httpOnly cookies preferred)
+- Display user-friendly error messages
+
+❌ **Don'ts:**
+- Don't send Google access token directly to backend
+- Don't store authorization code long-term
+- Don't expose Client ID and Secret on frontend
+- Don't use implicit flow (deprecated by Google)
+
+---
+
+## 🆘 Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| "Invalid Google token" | Get fresh auth code, don't reuse expired ones |
+| "Failed to obtain token" | Check Google Console redirect URI matches backend config |
+| "Code is required" | Ensure OAuth flow completed successfully |
+| User created but no name | Google account might have restricted name sharing |
+| "Email not verified" | Ask user to verify email in Google account |
+
+# ...existing code...
