@@ -91,13 +91,15 @@ def send_email(request, to, subject, body, is_approved=False):
                 userId="me", body=message
             ).execute()
             print("📧 Email sent! ID:", sent_message["id"])
+            return ({"📧 Email sent! ID:":sent_message["id"]})
         except:
             print("Google api isnt responding right now, please try later! ")
+            return ({"error":"Google api isnt responding right now, please try later!"})
         
     else:
         print("need to ask user for approval")
+        return ({"error":"need to ask user for approval."})
 
-    print("end of tool(send_email)...")
 
 
 # alter the database to add the task of sending email when the email is sent alter this function to be production ready

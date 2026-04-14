@@ -63,8 +63,11 @@ def contact_delete(request, pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_google_auth_url(request):
-    auth_url = build_auth_url()
-    return Response({"auth_url": auth_url})
+    try:
+        auth_url = build_auth_url()
+        return Response({"auth_url": auth_url} , status=200)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
 
 # the callback view that google will call after the user give the consent and we will get the code from

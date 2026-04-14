@@ -1,5 +1,8 @@
+import threading
+
 from django.db import models
 from Users.models import User
+
 
 
 class Chats(models.Model):
@@ -11,3 +14,5 @@ class Chats(models.Model):
     class Meta:
         managed = True
         db_table = 'chats'
+
+message_example = [{"role":"user","content":"Hello!"}]
