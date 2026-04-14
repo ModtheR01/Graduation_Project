@@ -64,6 +64,9 @@ def build_auth_url(user):
     print("FERNET_KEY:", sk  ,"GOOGLE_CLIENT_ID:", GOOGLE_CLIENT_ID, "GOOGLE_REDIRECT_URI:", GOOGLE_REDIRECT_URI, "OAUTH_AUTH_URL:", OAUTH_AUTH_URL)
     if not sk:
         raise ValueError("FERNET_KEY environment variable is not set")
+    print("user:", user)
+    print("user.id:", user.id)
+    print("type user.id:", type(user.id))
     encoded_user =jwt.encode({"user_id": user.id}, sk, algorithm="HS256")
     print("encoded_user:", encoded_user)
     params = {
