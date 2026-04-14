@@ -60,10 +60,18 @@ SCOPE = "https://www.googleapis.com/auth/gmail.send"
 
 def build_auth_url(user):
     print("in build_auth_url")
-    sk =os.getenv("FERNET_KEY")
+    sk = "test123"
     print("FERNET_KEY:", sk  ,"GOOGLE_CLIENT_ID:", GOOGLE_CLIENT_ID, "GOOGLE_REDIRECT_URI:", GOOGLE_REDIRECT_URI, "OAUTH_AUTH_URL:", OAUTH_AUTH_URL)
     if not sk:
         raise ValueError("FERNET_KEY environment variable is not set")
+    print("user:", user)
+    print("user.id:", user.id)
+    print("type user.id:", type(user.id))
+    print("TEST JWT START")
+
+    test = jwt.encode({"test": 1}, "test123", algorithm="HS256")
+
+    print("TEST JWT RESULT:", test)
     encoded_user =jwt.encode({"user_id": user.id}, sk, algorithm="HS256")
     print("encoded_user:", encoded_user)
     params = {
