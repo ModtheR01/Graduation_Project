@@ -390,99 +390,6 @@ const followUpResponse = await fetch('http://localhost:8000/chat/chat/', {
 }
 ```
 
-### 1️⃣ Get All Contacts
-
-**Endpoint** : `http://localhost:8000/sending_emails/contact/`
-Method: GET
-
-Description: Retrieve all contacts.
-
-Authentication: ✅ Required (JWT Token)
-*Note : 403 error means the user isnt the owner of the data he is quering ***
-
-✅ Success Response (200 OK)
-[
-  {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john@example.com",
-    "phone": "0123456789"
-  }
-]
-2️⃣ Create Contact
-
-Endpoint: http://localhost:8000/contact/create/
-Method: POST
-
-Description: Create a new contact.
-
-Authentication: ✅ Required (JWT Token)
-
-📥 Request Body
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "phone": "0123456789"
-}
-✅ Success Response (201 Created)
-{
-  "id": 1,
-  "name": "John Doe",
-  "email": "john@example.com",
-  "phone": "0123456789"
-}
-❌ Error Response (400 Bad Request)
-{
-  "email": ["This field is required."]
-}
-3️⃣ Update Contact
-
-Endpoint: http://localhost:8000/contact/update/<id>/
-Method: PUT
-
-Description: Update an existing contact.
-
-Authentication: ✅ Required (JWT Token)
-
-📥 Request Body
-{
-  "name": "Updated Name",
-  "email": "updated@example.com",
-  "phone": "0100000000"
-}
-✅ Success Response (200 OK)
-{
-  "id": 1,
-  "name": "Updated Name",
-  "email": "updated@example.com",
-  "phone": "0100000000"
-}
-❌ Error Responses
-
-Not Found (404):
-
-{}
-
-Validation Error (400):
-
-{
-  "email": ["Enter a valid email address."]
-}
-4️⃣ Delete Contact
-
-Endpoint: http://localhost:8000/contact/delete/<id>/
-Method: DELETE
-
-Description: Delete a contact.
-
-Authentication: ✅ Required (JWT Token)
-
-✅ Success Response (204 No Content)
-{}
-❌ Error Response (404 Not Found)
-{}
-
-
 ## 🛠️ Helper Functions
 
 ### JavaScript - Store and Use Tokens
@@ -680,3 +587,640 @@ For questions or issues, contact your backend team or check the full API documen
 **Version:** 1.0  
 **Status:** Production Ready ✅
 
+# ...existing code...
+
+### 3️⃣ Get User Information
+
+**Endpoint:** `https://romee.up.railway.app/Users/user-info/`
+
+**Method:** `GET`
+
+**Description:** Retrieve the authenticated user's profile information.
+
+**Authentication:** ✅ Required (JWT Token)
+
+**Request Headers:**
+```
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+```
+
+**Example Request (cURL):**
+
+```bash
+curl -X GET http://localhost:8000/Users/user-info/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const accessToken = localStorage.getItem('accessToken');
+
+const response = await fetch('http://localhost:8000/Users/user-info/', {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+const userData = await response.json();
+console.log('User Email:', userData.email);
+console.log('User Name:', userData.first_name, userData.last_name);
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+  "email": "john@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone_number": "+201012345678",
+  "country": "Egypt",
+  "city": "Cairo",
+  "street": "123 Main Street",
+  "birth_date": "1995-05-15"
+}
+```
+
+**Error Response:**
+
+❌ **Not authenticated (401 Unauthorized):**
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+❌ **Invalid token (401 Unauthorized):**
+```json
+{
+  "detail": "Invalid token."
+}
+```
+
+---
+
+### 4️⃣ Update User Information
+
+**Endpoint:** `https://romee.up.railway.app/Users/update-user-info/`
+
+**Method:** `PATCH`
+
+**Description:** Update the authenticated user's profile information. Only provided fields will be updated.
+
+**Authentication:** ✅ Required (JWT Token)
+
+**Request Body (All fields optional):**
+
+```json
+{
+  "fname": "Jane",
+  "lname": "Smith",
+  "phone_number": "+201098765432",
+  "country": "UAE",
+  "city": "Dubai",
+  "street": "456 Sheikh Zayed Road",
+  "birth_date": "1995-05-15"
+}
+```
+
+**Field Details:**
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| fname | string | ❌ | First name |
+| lname | string | ❌ | Last name |
+| phone_number | string | ❌ | Phone number |
+| country | string | ❌ | Country name |
+| city | string | ❌ | City name |
+| street | string | ❌ | Street address |
+| birth_date | date | ❌ | Format: YYYY-MM-DD |
+
+**Example Request (cURL):**
+
+```bash
+curl -X PATCH http://localhost:8000/Users/update-user-info/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fname": "Jane",
+    "city": "Dubai"
+  }'
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const accessToken = localStorage.getItem('accessToken');
+
+const response = await fetch('http://localhost:8000/Users/update-user-info/', {
+  method: 'PATCH',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    fname: 'Jane',
+    lname: 'Smith',
+    phone_number: '+201098765432',
+    city: 'Dubai'
+  })
+});
+
+const data = await response.json();
+console.log(data.message);  // "User information updated successfully"
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+  "message": "User information updated successfully"
+}
+```
+
+**Error Responses:**
+
+❌ **Not authenticated (401 Unauthorized):**
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+❌ **Invalid data (400 Bad Request):**
+```json
+{
+  "birth_date": ["Enter a valid date."]
+}
+```
+
+---
+
+### 5️⃣ Get All User Chats
+
+**Endpoint:** `https://romee.up.railway.app/chat/user-chats/`
+
+**Method:** `GET`
+
+**Description:** Retrieve all chats for the authenticated user with their IDs and titles.
+
+**Authentication:** ✅ Required (JWT Token)
+
+**Request Headers:**
+```
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+```
+
+**Example Request (cURL):**
+
+```bash
+curl -X GET http://localhost:8000/chat/user-chats/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const accessToken = localStorage.getItem('accessToken');
+
+const response = await fetch('http://localhost:8000/chat/user-chats/', {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+const chats = await response.json();
+chats.forEach(chat => {
+  console.log(`Chat: ${chat.title} (ID: ${chat.id})`);
+});
+```
+
+**Success Response (200 OK):**
+
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "title": "Flight Search - Cairo to Dubai"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "title": "Hotel Recommendations in Dubai"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "title": "Travel Budget Planning"
+  }
+]
+```
+
+**Error Responses:**
+
+❌ **No chats found (404 Not Found):**
+```json
+{
+  "error": "No chats found"
+}
+```
+
+❌ **Not authenticated (401 Unauthorized):**
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+**Notes:**
+- Returns an array of chat summaries
+- Each chat has an ID (use this to fetch full conversation) and auto-generated title
+- Title is based on the first message in the chat
+- Display these as a list of recent conversations in your UI
+
+---
+
+### 6️⃣ Get Chat by ID (Full Conversation)
+
+**Endpoint:** `https://romee.up.railway.app/chat/chat/<chat_id>/`
+
+**Method:** `GET`
+
+**Description:** Retrieve the complete conversation history for a specific chat.
+
+**Authentication:** ✅ Required (JWT Token)
+
+**URL Parameters:**
+
+| Parameter | Type | Required | Notes |
+|-----------|------|----------|-------|
+| chat_id | string (UUID) | ✅ | The unique identifier of the chat |
+
+**Request Headers:**
+```
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+```
+
+**Example Request (cURL):**
+
+```bash
+curl -X GET "http://localhost:8000/chat/chat/550e8400-e29b-41d4-a716-446655440000/" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const accessToken = localStorage.getItem('accessToken');
+const chatId = '550e8400-e29b-41d4-a716-446655440000';
+
+const response = await fetch(`http://localhost:8000/chat/chat/${chatId}/`, {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+const messages = await response.json();
+messages.forEach(msg => {
+  if (msg.role === 'user') {
+    console.log(`📤 You: ${msg.content}`);
+  } else {
+    console.log(`🤖 Assistant: ${msg.content}`);
+  }
+});
+```
+
+**Success Response (200 OK):**
+
+```json
+[
+  {
+    "role": "user",
+    "content": "Find me flights from Cairo to Dubai on April 10, 2026"
+  },
+  {
+    "role": "assistant",
+    "content": "I found 15 flights from Cairo (CAI) to Dubai (DXB) on April 10th. Here are the top options:\n\n1. Emirates EK901\n   Departure: 08:30 AM\n   Arrival: 12:30 PM (same day)\n   Duration: 4 hours\n   Price: $320\n\n2. Flydubai FZ203\n   Departure: 02:15 PM\n   Arrival: 06:15 PM\n   Duration: 4 hours\n   Price: $285\n\n3. Air Arabia G9102\n   Departure: 10:50 PM\n   Arrival: 02:50 AM (next day)\n   Duration: 4 hours\n   Price: $195"
+  },
+  {
+    "role": "user",
+    "content": "Can you book the cheapest one?"
+  },
+  {
+    "role": "assistant",
+    "content": "I can help you book Air Arabia G9102 (the cheapest option at $195). However, I'll need some information:\n\n1. Full name (as it appears in your passport)\n2. Passport number\n3. Date of birth\n4. Email address\n5. Phone number\n6. Baggage preference (carry-on only or checked baggage)\n\nWould you like to proceed with this booking?"
+  }
+]
+```
+
+**Error Responses:**
+
+❌ **Chat not found (404 Not Found):**
+```json
+{
+  "error": "Chat not found"
+}
+```
+
+❌ **Not authenticated (401 Unauthorized):**
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+❌ **Access denied - chat belongs to different user (403 Forbidden):**
+```json
+{
+  "error": "You don't have permission to access this chat."
+}
+```
+
+**Notes:**
+- Returns an array of message objects in chronological order
+- Each message has `role` (either "user" or "assistant") and `content`
+- Users can only access their own chats (backend enforces this)
+- Use this endpoint to fetch full conversation when user clicks on a chat from the list
+
+---
+
+### 1️⃣ Get All Contacts
+
+**Endpoint:** `http://localhost:8000/sending_emails/contact/`
+
+**Method:** `GET`
+
+**Description:** Retrieve all contacts.
+
+**Authentication:** ✅ Required (JWT Token)
+
+**Request Headers:**
+```
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const accessToken = localStorage.getItem('accessToken');
+
+const response = await fetch('http://localhost:8000/sending_emails/contact/', {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+const contacts = await response.json();
+console.log(contacts);
+```
+
+**Success Response (200 OK):**
+
+```json
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "0123456789"
+  },
+  {
+    "id": 2,
+    "name": "Jane Smith",
+    "email": "jane@example.com",
+    "phone": "0198765432"
+  }
+]
+```
+
+**Error Response:**
+
+❌ **Not authenticated (401 Unauthorized):**
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+**Note:** 🔒 403 Forbidden means you're trying to access data that doesn't belong to your account.
+
+---
+
+### 2️⃣ Create Contact
+
+**Endpoint:** `http://localhost:8000/sending_emails/contact/create/`
+
+**Method:** `POST`
+
+**Description:** Create a new contact.
+
+**Authentication:** ✅ Required (JWT Token)
+
+**Request Body:**
+
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "phone": "0123456789"
+}
+```
+
+**Field Details:**
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| name | string | ✅ | Contact's full name |
+| email | string | ✅ | Valid email address |
+| phone | string | ✅ | Phone number |
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const accessToken = localStorage.getItem('accessToken');
+
+const response = await fetch('http://localhost:8000/sending_emails/contact/create/', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'John Doe',
+    email: 'john@example.com',
+    phone: '0123456789'
+  })
+});
+
+const newContact = await response.json();
+console.log('Contact created:', newContact);
+```
+
+**Success Response (201 Created):**
+
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john@example.com",
+  "phone": "0123456789"
+}
+```
+
+**Error Responses:**
+
+❌ **Missing required field (400 Bad Request):**
+```json
+{
+  "email": ["This field is required."]
+}
+```
+
+❌ **Invalid email (400 Bad Request):**
+```json
+{
+  "email": ["Enter a valid email address."]
+}
+```
+
+---
+
+### 3️⃣ Update Contact
+
+**Endpoint:** `http://localhost:8000/sending_emails/contact/update/<id>/`
+
+**Method:** `PUT`
+
+**Description:** Update an existing contact by ID.
+
+**Authentication:** ✅ Required (JWT Token)
+
+**URL Parameters:**
+
+| Parameter | Type | Required | Notes |
+|-----------|------|----------|-------|
+| id | integer | ✅ | The contact ID |
+
+**Request Body:**
+
+```json
+{
+  "name": "Updated Name",
+  "email": "updated@example.com",
+  "phone": "0100000000"
+}
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const accessToken = localStorage.getItem('accessToken');
+const contactId = 1;
+
+const response = await fetch(`http://localhost:8000/sending_emails/contact/update/${contactId}/`, {
+  method: 'PUT',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'Updated Name',
+    email: 'updated@example.com',
+    phone: '0100000000'
+  })
+});
+
+const updatedContact = await response.json();
+console.log('Contact updated:', updatedContact);
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+  "id": 1,
+  "name": "Updated Name",
+  "email": "updated@example.com",
+  "phone": "0100000000"
+}
+```
+
+**Error Responses:**
+
+❌ **Contact not found (404 Not Found):**
+```json
+{}
+```
+
+❌ **Invalid email (400 Bad Request):**
+```json
+{
+  "email": ["Enter a valid email address."]
+}
+```
+
+---
+
+### 4️⃣ Delete Contact
+
+**Endpoint:** `http://localhost:8000/sending_emails/contact/delete/<id>/`
+
+**Method:** `DELETE`
+
+**Description:** Delete a contact by ID.
+
+**Authentication:** ✅ Required (JWT Token)
+
+**URL Parameters:**
+
+| Parameter | Type | Required | Notes |
+|-----------|------|----------|-------|
+| id | integer | ✅ | The contact ID |
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const accessToken = localStorage.getItem('accessToken');
+const contactId = 1;
+
+const response = await fetch(`http://localhost:8000/sending_emails/contact/delete/${contactId}/`, {
+  method: 'DELETE',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+if (response.status === 204) {
+  console.log('Contact deleted successfully');
+}
+```
+
+**Success Response (204 No Content):**
+
+```
+(Empty response body)
+```
+
+**Error Response:**
+
+❌ **Contact not found (404 Not Found):**
+```json
+{}
+```
+
+# ...existing code...
