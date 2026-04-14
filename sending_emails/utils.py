@@ -103,6 +103,7 @@ def exchange_code_for_tokens(code: str):
 def save_tokens(user_id, token_data: dict):
     user = User.objects.get(id=user_id)
 
+
     access_token = token_data.get("access_token")
     refresh_token = token_data.get("refresh_token")
     expires_at = token_data.get("expires_at")
