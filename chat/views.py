@@ -20,10 +20,7 @@ def send_message(request):
     if not chat_id:
         chat = Chats(
             user_email=request.user,
-            message=[{
-                "role": "user",
-                "content": user_message
-            }],
+            message=[{"role": "user","content": user_message}],
         )
         chat.save()
     else:
@@ -32,14 +29,12 @@ def send_message(request):
             id=chat_id,
             user_email=request.user
         )
-
         messages = chat.message or []
         messages.append({
             "role": "user",
             "content": user_message
         })
         chat.message = messages
-
 
     try:
         if not chat_id: 
