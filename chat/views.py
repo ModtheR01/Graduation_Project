@@ -44,7 +44,6 @@ def send_message(request):
     try:
         if not chat_id: 
             Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
-
         response = message_agent(chat.message)
     except Exception as e:
         print(f"Agent error: {e}")
@@ -57,6 +56,24 @@ def send_message(request):
     Chats.objects.filter(id=chat.id).update(message=chat.message)
     return Response({
         "response": response,
+        # "title": chat.title,
         "chat_id": chat.id,
         "messages": chat.message 
     })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_chats(request):
+    chats = Chats.objects.filter(user_email=request.user).values('id', 'title')
+    if not chats:
+        return Response({"error": "No chats found"}, status=404)
+    return Response(chats)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_chat_by_id(request, chat_id):
+    # chat = get_object_or_404(Chats, id=chat_id, user_email=request.user)
+    chat = Chats.objects.filter(id=chat_id, user_email=request.user).first()
+    if not chat:
+        return Response({"error": "Chat not found"}, status=404)
+    return Response(chat.message)
