@@ -43,12 +43,12 @@ cipher = Fernet(FERNET_KEY.encode())
 
 
 class Tokens(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user_email = models.ForeignKey(User, models.CASCADE, db_column='user_email')
 
     access_token = models.TextField(blank=True, null=True)
-    refresh_token = models.TextField(null=True)
+    refresh_token = models.TextField(blank=True,null=True)
 
-    expiry = models.DateTimeField(null=True)
+    expiry = models.DateTimeField(blank=True,null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

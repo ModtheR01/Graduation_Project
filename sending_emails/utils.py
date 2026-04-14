@@ -111,28 +111,23 @@ def exchange_code_for_tokens(code: str):
 
     return token_data
 
-def save_tokens(user_id, token_data: dict):
+def save_tokens(user_id, token_data):
     user = User.objects.get(pk=user_id)
 
 
     access_token = token_data.get("access_token")
     refresh_token = token_data.get("refresh_token")
-    expires_at = token_data.get("expires_at")
-
-    if not refresh_token or expires_at is None:
+    expiry_datetime = token_data.get("expires_at")
+    if not refresh_token or not expiry_datetime:
         raise ValueError("No refresh token or expiry time returned from Google")
 
-    expiry_datetime = datetime.fromtimestamp(expires_at, tz=timezone.utc)
+    token_obj = Tokens(
+        user_email=user,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expiry= datetime.fromtimestamp(expiry_datetime, tz=timezone.utc)
+    )
 
-    token_obj, created = Tokens.objects.get_or_create(user=user)
-
-    token_obj.access_token = access_token
-
-    # ⚠️ Google ساعات مش بترجع refresh_token تاني
-    if refresh_token:
-        token_obj.refresh_token = refresh_token
-
-    token_obj.expiry = expiry_datetime
     token_obj.save()
 
 def get_valid_access_token(user):
