@@ -71,7 +71,7 @@ def build_auth_url(user):
     test = jwt.encode({"test": 1}, "test123", algorithm="HS256")
 
     print("TEST JWT RESULT:", test)
-    encoded_user =jwt.encode({"user_id": user}, sk, algorithm="HS256")
+    encoded_user = jwt.encode({"user_id": user.pk}, sk, algorithm="HS256")
     print("encoded_user:", encoded_user)
     params = {
         "client_id": GOOGLE_CLIENT_ID,
