@@ -8,7 +8,7 @@ from .serializers import SignupSerializer, LoginSerializer
 import requests as http_requests
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-#from chat.api_keys import AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_CLIENT_SECRET, AUTH_GOOGLE_REDIRECT_URI
+from chat.api_keys import AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_CLIENT_SECRET, AUTH_GOOGLE_REDIRECT_URI
 from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
@@ -80,71 +80,79 @@ def update_user_info(request):
 
 
 
-# @api_view(['POST'])
-# def login_with_google(request):
+@api_view(['POST'])
+def login_with_google(request):
 
-#     code = request.data.get('code') # catch the authorization code sent by google after the user successfully authenticated with google, this code is a temporary token that can be exchanged for an access token and an ID token, which contain the user's information and can be used to authenticate the user in our system.
+    code = request.data.get('code') # catch the authorization code sent by google after the user successfully authenticated with google, this code is a temporary token that can be exchanged for an access token and an ID token, which contain the user's information and can be used to authenticate the user in our system.
 
-#     if not code:
-#         return Response({'error': 'Code is required'}, status=400)
-#     token_response = http_requests.post(     # Send a POST request to Google's token endpoint to exchange the authorization code for tokens (access token and ID token). The request includes the authorization code, client ID, client secret, redirect URI, and grant type. The response will contain the tokens if the request is successful.
-#         'https://oauth2.googleapis.com/token', 
-#         data={
-#             'code': code,
-#             'client_id': AUTH_GOOGLE_CLIENT_ID,
-#             'client_secret': AUTH_GOOGLE_CLIENT_SECRET,
-#             'redirect_uri': AUTH_GOOGLE_REDIRECT_URI,
-#             'grant_type': 'authorization_code',
-#         })
+    if not code:
+        return Response({'error': 'Code is required'}, status=400)
+    token_response = http_requests.post(     # Send a POST request to Google's token endpoint to exchange the authorization code for tokens (access token and ID token). The request includes the authorization code, client ID, client secret, redirect URI, and grant type. The response will contain the tokens if the request is successful.
+        'https://oauth2.googleapis.com/token', 
+        data={
+            'code': code,
+            'client_id': AUTH_GOOGLE_CLIENT_ID,
+            'client_secret': AUTH_GOOGLE_CLIENT_SECRET,
+            'redirect_uri': AUTH_GOOGLE_REDIRECT_URI,
+            'grant_type': 'authorization_code',
+        })
 
-#     if token_response.status_code != 200:
-#         return Response({'error': 'Failed to obtain token'}, status=400)
+    print(f"[Google Auth] token exchange status: {token_response.status_code}")
+    if token_response.status_code != 200:
+        print(f"[Google Auth] token exchange failed: {token_response.json()}")
+        return Response({'error': 'Failed to obtain token'}, status=400)
 
-#     token_data = token_response.json()
-#     id_token_str = token_data.get('id_token')
+    token_data = token_response.json()
+    id_token_str = token_data.get('id_token')
 
-#     if not id_token_str:
-#         return Response({'error': 'ID token not found'}, status=400)
+    if not id_token_str:
+        print("[Google Auth] id_token not found in response")
+        return Response({'error': 'ID token not found'}, status=400)
 
-#     try:
-#         user_info = id_token.verify_oauth2_token( # check if is sent by google or not , and check if this token from my app(app created on google console) or from another app, if this checks passed it will return the user's information contained in the ID token, such as email and name, which can be used to create or authenticate the user in our system.
-#             id_token_str,
-#             google_requests.Request(),
-#             AUTH_GOOGLE_CLIENT_ID
-#         )
-#     except Exception:
-#         return Response({'error': 'Invalid Google token'}, status=400)
+    try:
+        user_info = id_token.verify_oauth2_token( # check if is sent by google or not , and check if this token from my app(app created on google console) or from another app, if this checks passed it will return the user's information contained in the ID token, such as email and name, which can be used to create or authenticate the user in our system.
+            id_token_str,
+            google_requests.Request(),
+            AUTH_GOOGLE_CLIENT_ID
+        )
+        print(f"[Google Auth] user verified: {user_info.get('email')}")
+    except Exception as e:
+        print(f"[Google Auth] error occurred: {e}")
+        return Response({'error': 'Invalid Google token'}, status=400)
 
-#     email = user_info.get('email')
-#     if not email:
-#         return Response({'error': 'Email not provided by Google'}, status=400)
-#     if not user_info.get('email_verified'): # Ensure the user's email is verified by Google to prevent fake or unconfirmed accounts from accessing the system
-#         return Response({'error': 'Email not verified'}, status=400)
-#     name = user_info.get('name', '')
-#     first_name=''
-#     last_name=''
+    email = user_info.get('email')
+    if not email:
+        print("[Google Auth] Email not provided by Google")
+        return Response({'error': 'Email not provided by Google'}, status=400)
+    if not user_info.get('email_verified'): # Ensure the user's email is verified by Google to prevent fake or unconfirmed accounts from accessing the system
+        print("[Google Auth] Email not verified")
+        return Response({'error': 'Email not verified'}, status=400)
+    name = user_info.get('name', '')
+    first_name=''
+    last_name=''
 
-#     if name: # if the name not equal empty string
-#         parts_of_name = name.split() # split the full name into parts (e.g., first name and last name) based on spaces. This allows us to extract the first and last names from the full name provided by Google.
-#         first_name= parts_of_name[0] if len(parts_of_name) > 0 else ''
-#         last_name = parts_of_name[-1] if len(parts_of_name) > 1 else ''
+    if name: # if the name not equal empty string
+        parts_of_name = name.split() # split the full name into parts (e.g., first name and last name) based on spaces. This allows us to extract the first and last names from the full name provided by Google.
+        first_name= parts_of_name[0] if len(parts_of_name) > 0 else ''
+        last_name = parts_of_name[-1] if len(parts_of_name) > 1 else ''
 
-#     user, created = User.objects.get_or_create( # get_or_create returns two values: user = the user object (existing or newly created) , created = True if a new user was created, False if it already existed
-#         email=email, # to search for an existing user with the provided email. If a user with that email already exists, it will return that user and created will be False. If no user with that email exists, it will create a new user with the provided email and name, and created will be True.
-#         defaults={
-#             'fname': first_name,
-#             'lname': last_name,
-#         }
-#     )
+    user, created = User.objects.get_or_create( # get_or_create returns two values: user = the user object (existing or newly created) , created = True if a new user was created, False if it already existed
+        email=email, # to search for an existing user with the provided email. If a user with that email already exists, it will return that user and created will be False. If no user with that email exists, it will create a new user with the provided email and name, and created will be True.
+        defaults={
+            'fname': first_name,
+            'lname': last_name,
+        }
+    )
 
-#     if created:
-#         user.set_unusable_password() # Since the user is authenticated through Google, we set an unusable password to prevent login with a password. This ensures that the user can only authenticate using their Google account and not through traditional username/password authentication.
-#         user.save()
+    print(f"[Google Auth] user: {email} | created: {created}")
+    if created:
+        user.set_unusable_password() # Since the user is authenticated through Google, we set an unusable password to prevent login with a password. This ensures that the user can only authenticate using their Google account and not through traditional username/password authentication.
+        user.save()
 
-#     refresh = RefreshToken.for_user(user)
-#     return Response({
-#         'access': str(refresh.access_token),
-#         'refresh': str(refresh),
-#         'message': 'Login Successfully',
-#         'is_new_user': created,
-#     })
+    refresh = RefreshToken.for_user(user)
+    return Response({
+        'access': str(refresh.access_token),
+        'refresh': str(refresh),
+        'message': 'Login Successfully',
+        'is_new_user': created,
+    })
