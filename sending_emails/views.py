@@ -78,6 +78,7 @@ def get_google_auth_url(request):
 def google_callback(request):
     code = request.GET.get("code")
     data = request.GET.get("state")
+    print("code:", code, "state:", data)
 
     if not code:
         return Response({"error": "No code provided"}, status=400)
@@ -89,12 +90,14 @@ def google_callback(request):
             raise ValueError("FERNET_KEY environment variable is not set")
 
         decoded_data = jwt.decode(data, sk, algorithms=["HS256"])
+        print("decoded_data:", decoded_data)
         user_id = decoded_data.get("user_id")
+        print("user_id:", user_id)
     except jwt.InvalidTokenError:
         return Response({"error": "Invalid state parameter"}, status=400)
 
     tokens_data = exchange_code_for_tokens(code)
-
+    print("tokens_data:", tokens_data)
     save_tokens(user_id, tokens_data)
 
     return Response({"message": "Google account connected successfully"})
