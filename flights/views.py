@@ -11,22 +11,23 @@ HEADERS = {
 }
 
 
-@tool
+# @tool
 def search_flights(origin: str, destination: str, date: str):
-    """
-    Search for available flights between two cities on a given date.
-    Input Rules:
-        origin: departure city name (ANY language is allowed), if the user doesn't mention the name of city and mention the name of nation, you can use the nation's capital as the origin city.
-            The system MUST convert it to English before processing.
-        destination: arrival city name (ANY language is allowed), if the user doesn't mention the name of city and mention the name of nation, you can use the nation's capital as the origin city.
-            The system MUST convert it to English before processing.
-        date: travel date in format YYYY-MM-DD , if the user provides it in another format, convert it to the required format before processing.
-    Important Notes:
-        Always assume user input may be misspelled or not in English.
-    Output Rules (STRICT FORMAT):
-        You MUST call the tool and return its response as-is.
-        If the tool output starts with [FINAL_ANSWER], you MUST return everything after it exactly as-is.
-    """
+    # """
+    # Always communicate with the user in the same language they use, and respond in that language.
+    # Search for available flights between two cities on a given date.
+    # Input Rules:
+    #     origin: departure city name (ANY language is allowed), if the user doesn't mention the name of city and mention the name of nation, you can use the nation's capital as the origin city.
+    #         The system MUST convert it to English before processing.
+    #     destination: arrival city name (ANY language is allowed), if the user doesn't mention the name of city and mention the name of nation, you can use the nation's capital as the origin city.
+    #         The system MUST convert it to English before processing.
+    #     date: travel date in format YYYY-MM-DD , if the user provides it in another format, convert it to the required format before processing.
+    # Important Notes:
+    #     Always assume user input may be misspelled or not in English.
+    # Output Rules (STRICT FORMAT):
+    #     You MUST call the tool and return its response as-is.
+    #     If the tool output starts with [FINAL_ANSWER], you MUST return everything after it exactly as-is.
+    # """
     print("in tool in views")
     origin_ids = get_place_id(origin)
     dest_ids = get_place_id(destination)
@@ -52,12 +53,13 @@ def search_flights(origin: str, destination: str, date: str):
     data = response.json()
     flights = []
 
-    for item in data.get("itineraries", [])[:5]:
+    for i, item in enumerate(data.get("itineraries", [])[:5], 1):
         leg = item["legs"][0]
         # 🧠 تحويل duration
         hours = leg["durationMinutes"] // 60
         minutes = leg["durationMinutes"] % 60
         flights.append({
+            "id": i,
             "route": f"{origin} → {destination}",
             "time": f"{leg['departure'][11:16]} → {leg['arrival'][11:16]}",
             "duration": f"{hours}h {minutes}m",
@@ -74,12 +76,57 @@ def search_flights(origin: str, destination: str, date: str):
         {f['price']}
         {stops}
         """
+
+    store = get_store()
+    store["last_offers"] = {f["id"]: f for f in flights}
+    print("ALL OFFERS:", store["last_offers"].get(2))
     print("TOOL RESULT:", flights_text)
     return f"[FINAL_ANSWER]\n{flights_text.strip()}"
 
 
-# if __name__ == "__main__":
-#     print(search_flights("Cairo", "Riyadh", "2026-05-10"))
+if __name__ == "__main__":
+    print(search_flights("Cairo", "Riyadh", "2026-05-10"))
+
+
+@tool
+def booking_flight(offer_id:int):
+    """
+    book a flight offer by its ID from the last search results.
+    """
+    store= get_store()
+    offer = store["last_"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # @tool
 # def search_anywhere(origin: str):
