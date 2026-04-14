@@ -7,9 +7,12 @@ from django.utils import timezone as tz
 from datetime import datetime, timezone
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+
+from Users.models import User
 from .models import Contacts , Tokens
 import os
 from dotenv import load_dotenv
+import jwt
 load_dotenv()
 
 
@@ -55,7 +58,14 @@ SCOPE = "https://www.googleapis.com/auth/gmail.send"
 
 
 
-def build_auth_url():
+def build_auth_url(user):
+    print("in build_auth_url")
+    sk =os.getenv("FERNET_KEY")
+    print("FERNET_KEY:", sk  ,"GOOGLE_CLIENT_ID:", GOOGLE_CLIENT_ID, "GOOGLE_REDIRECT_URI:", GOOGLE_REDIRECT_URI, "OAUTH_AUTH_URL:", OAUTH_AUTH_URL)
+    if not sk:
+        raise ValueError("FERNET_KEY environment variable is not set")
+    encoded_user =jwt.encode({"user_id": user.id}, sk, algorithm="HS256")
+    print("encoded_user:", encoded_user)
     params = {
         "client_id": GOOGLE_CLIENT_ID,
         "redirect_uri": GOOGLE_REDIRECT_URI,
@@ -63,6 +73,7 @@ def build_auth_url():
         "scope": SCOPE,
         "access_type": "offline",      # so we get a refresh_token instead of asking user to login again
         "prompt": "consent",           # force showing consent screen even if the user gave consent before
+        "state": encoded_user  # encode user id in the state param to identify the user when google redirects back to our app
     }
     # this link should be returned to hassan so he call it on the frontend to show conscent screen
     return f"{OAUTH_AUTH_URL}?{urllib.parse.urlencode(params)}"
@@ -93,8 +104,9 @@ def exchange_code_for_tokens(code: str):
 
     return token_data
 
-def save_tokens(request, token_data: dict):
-    user = request.user
+def save_tokens(user_id, token_data: dict):
+    user = User.objects.get(id=user_id)
+
 
     access_token = token_data.get("access_token")
     refresh_token = token_data.get("refresh_token")

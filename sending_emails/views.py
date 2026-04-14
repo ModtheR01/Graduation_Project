@@ -1,7 +1,9 @@
+import os
+
 from rest_framework.decorators import api_view , permission_classes
 from rest_framework.permissions import IsAuthenticated 
 from rest_framework.response import Response
-
+import jwt
 from .utils import build_auth_url , exchange_code_for_tokens , save_tokens
 from .models import Contacts
 from .serializers import contact_serializer
@@ -64,7 +66,7 @@ def contact_delete(request, pk):
 @permission_classes([IsAuthenticated])
 def get_google_auth_url(request):
     try:
-        auth_url = build_auth_url()
+        auth_url = build_auth_url(request.user)
         return Response({"auth_url": auth_url} , status=200)
     except Exception as e:
         return Response({"error": str(e)}, status=500)
@@ -75,13 +77,28 @@ def get_google_auth_url(request):
 @api_view(['GET'])
 def google_callback(request):
     code = request.GET.get("code")
+    data = request.GET.get("state")
+    print("code:", code, "state:", data)
 
     if not code:
         return Response({"error": "No code provided"}, status=400)
 
-    tokens_data = exchange_code_for_tokens(code)
+    # Decode the state parameter to get the user ID
+    try:
+        sk = os.getenv("FERNET_KEY")
+        if not sk:
+            raise ValueError("FERNET_KEY environment variable is not set")
 
-    save_tokens(request, tokens_data)
+        decoded_data = jwt.decode(data, sk, algorithms=["HS256"])
+        print("decoded_data:", decoded_data)
+        user_id = decoded_data.get("user_id")
+        print("user_id:", user_id)
+    except jwt.InvalidTokenError:
+        return Response({"error": "Invalid state parameter"}, status=400)
+
+    tokens_data = exchange_code_for_tokens(code)
+    print("tokens_data:", tokens_data)
+    save_tokens(user_id, tokens_data)
 
     return Response({"message": "Google account connected successfully"})
 
