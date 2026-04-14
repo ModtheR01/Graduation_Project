@@ -60,7 +60,7 @@ SCOPE = "https://www.googleapis.com/auth/gmail.send"
 
 def build_auth_url(user):
     print("in build_auth_url")
-    sk = "test123"
+    sk = os.getenv("FERNET_KEY")
     print("FERNET_KEY:", sk  ,"GOOGLE_CLIENT_ID:", GOOGLE_CLIENT_ID, "GOOGLE_REDIRECT_URI:", GOOGLE_REDIRECT_URI, "OAUTH_AUTH_URL:", OAUTH_AUTH_URL)
     if not sk:
         raise ValueError("FERNET_KEY environment variable is not set")
