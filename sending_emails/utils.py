@@ -1,4 +1,5 @@
 import time
+from urllib import response
 import urllib.parse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -120,7 +121,8 @@ def save_tokens(user_id, token_data):
     expiry_datetime = token_data.get("expires_at")
     if not refresh_token or not expiry_datetime:
         raise ValueError("No refresh token or expiry time returned from Google")
-
+    if Tokens.objects.filter(user=user).exists():
+        raise ValueError("Tokens for this user already exist")
     token_obj = Tokens(
         user_id=user,
         access_token=access_token,

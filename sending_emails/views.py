@@ -1,5 +1,5 @@
 import os
-
+from django.shortcuts import redirect
 from rest_framework.decorators import api_view , permission_classes
 from rest_framework.permissions import IsAuthenticated 
 from rest_framework.response import Response
@@ -100,7 +100,8 @@ def google_callback(request):
     except Exception as e:
         return Response({"error": "Token exchange failed", "detail": str(e)}, status=500)
 
-    return Response({"success": True}) 
+    return redirect("https://romee-lake.vercel.app/") 
+
 # def google_callback(request):
 #     code = request.GET.get("code")
 #     data = request.GET.get("state")
