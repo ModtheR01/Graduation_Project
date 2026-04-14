@@ -119,7 +119,7 @@ def save_tokens(user_id, token_data: dict):
     refresh_token = token_data.get("refresh_token")
     expires_at = token_data.get("expires_at")
 
-    if not refresh_token or not expires_at:
+    if not refresh_token or expires_at is None:
         raise ValueError("No refresh token or expiry time returned from Google")
 
     expiry_datetime = datetime.fromtimestamp(expires_at, tz=timezone.utc)
