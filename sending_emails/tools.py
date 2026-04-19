@@ -1,3 +1,5 @@
+from flights.state_store import get_store
+
 from .utils import get_gmail_service
 from email.mime.text import MIMEText
 import base64
@@ -52,7 +54,7 @@ def add_new_contact(request, name, email):
 
 
 @tool
-def send_email(user_id, to, subject, body, is_approved=False):
+def send_email( to, subject, body, is_approved=False):
     """
     Never Send any email before making a draft and showing it to the user and the user must agree to send it 
     
@@ -60,17 +62,19 @@ def send_email(user_id, to, subject, body, is_approved=False):
 
     Use this tool whenever the user asks to send an email, write an email, or deliver a message via email.
 
+    
     Required parameters:
     - to: recipient's email address (must be a valid email format, e.g., "example@gmail.com")
     - subject: short subject line summarizing the email's purpose
     - body: full message content to be included in the email body
     - is_approved: check if the user approved the drafted email before actually sending it
-    - user_id : the user object (provided by the system)
 
     The tool does not return anything, but assumes the email is successfully sent.
     """
 
     print("initializing Gmail service... step 3")
+    store = get_store()
+    user_id = store.get("user_id")
     print("user_id in send_email:", user_id, "type:", type(user_id), "to:", to, "subject:", subject, "body:", body, "is_approved:", is_approved)
     service = get_gmail_service(user_id)
     print("Gmail service initialized successfully.")

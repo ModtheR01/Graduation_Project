@@ -14,8 +14,8 @@ from Tasks.models import Tasks
 @permission_classes([IsAuthenticated]) # make  the end point allowed to authenticated users
 def send_message(request):
     chat_id = request.data.get('chat_id') # catch the chat_id will be sent by frontend developer in JSON 'in request' , if it not catched -> chat_id=none
-    user_id = request.user.pk
-    print("user id in send message",user_id ,type(user_id))
+    store = get_store()
+    store["user_id"] = request.user.pk
     user_message = request.data.get('message') # catch the user message 
     print("user",request.user ,type(request.user))
     if not user_message:
@@ -47,7 +47,7 @@ def send_message(request):
     try:
         if not chat_id: 
             Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
-        response = message_agent(user_id,chat.message)
+        response = message_agent(chat.message)
         if "[PAYMENT_REQUIRED]" in response:
             task_id = store.get("pending_payment_task_id")
             if not task_id:

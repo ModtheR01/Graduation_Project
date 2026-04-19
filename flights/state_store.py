@@ -4,6 +4,7 @@ _store = {
     "booking": None,
     "task_id": None,
     "chat_id": None,
+    "user_id": None,
 }
 
 def get_store():
