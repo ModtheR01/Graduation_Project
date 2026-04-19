@@ -16,7 +16,7 @@ llm = ChatOpenAI(
     temperature=0.4,
 )
 #  , search_in_contact, add_new_contact, send_email
-tools = [search_flights,booking_flight ,search_in_contact, add_new_contact, send_email]
+tools = [search_flights,booking_flight, send_email]
 #tools = [search_flights,send_email]
 agent = create_agent(llm, tools=tools)
 print("agent created ....")
