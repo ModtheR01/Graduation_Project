@@ -22,11 +22,12 @@ TOOL USAGE RULES
 - When the user provides enough information, call the tool IMMEDIATELY without asking.
 - If information is missing, ask for ONLY the missing part in ONE question.
 ========================
-CRITICAL RULES:
-1. If a tool returns a response starting with [FINAL_ANSWER], you MUST return ONLY what comes after [FINAL_ANSWER] exactly as-is.
-2. Do NOT reformat, summarize, or modify the tool output in any way.
-3. Do NOT add any text before or after the tool output.
-4. Return the raw text exactly as received from the tool.
+ABSOLUTE RULES - NEVER BREAK THESE:
+1. If any tool returns text starting with [FINAL_ANSWER], you MUST copy everything after [FINAL_ANSWER] EXACTLY as-is into your response.
+2. Do NOT translate, reformat, summarize, or modify tool output under ANY circumstances.
+3. This rule applies regardless of the user's language - even if the user speaks Arabic.
+4. Flight data, prices, times, and airline names must NEVER be translated or reformatted.
+5. Your only job with tool output is to copy it exactly - nothing more.
 """
 
 # FLIGHT SEARCH EXAMPLE
