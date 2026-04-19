@@ -16,12 +16,12 @@ llm = ChatOpenAI(
     temperature=0.4,
 )
 #  , search_in_contact, add_new_contact, send_email
-tools = [search_flights,booking_flight]
-#tools = [search_flights,send_email]
+tools = [search_flights,booking_flight, send_email]
+#tools = [search_flights,send_email] 
 agent = create_agent(llm, tools=tools)
 print("agent created ....")
-def message_agent(chat_messages):
-    messages = {"messages": [("system", system_prompt)]}
+def message_agent(user_id,chat_messages):
+    messages = {"user_id":user_id,"messages": [("system", system_prompt)]}
     for msg in chat_messages:
         messages["messages"].append((msg["role"], msg["content"]))
     response = agent.invoke(messages)["messages"][-1].content
