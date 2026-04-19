@@ -33,8 +33,12 @@ def search_flights(origin: str, destination: str, date: str):
     Important Notes:
         Always assume user input may be misspelled or not in English.
     Output Rules (STRICT FORMAT):
-        You MUST call the tool and return its response as-is.
-        If the tool output starts with [FINAL_ANSWER], you MUST return everything after it exactly as-is.
+        - You MUST call the tool and return its response as-is.
+        - The flight results are considered RAW DATA.
+        You MUST NOT translate, reformat, summarize, or modify them in any way.
+        - Even if the user speaks Arabic, DO NOT translate airline names, times, prices, or formatting.
+        - If the tool output starts with [FINAL_ANSWER], you MUST return everything after it EXACTLY as-is.
+        - The language rule applies ONLY to normal conversation text, NOT to structured flight results.
     """
     print("🔥 search_flights CALLED")
     origin_ids = get_place_id(origin)
