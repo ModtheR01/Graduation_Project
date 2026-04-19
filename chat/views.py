@@ -13,11 +13,9 @@ from flights.state_store import get_store
 @permission_classes([IsAuthenticated]) # make  the end point allowed to authenticated users
 def send_message(request):
     chat_id = request.data.get('chat_id') # catch the chat_id will be sent by frontend developer in JSON 'in request' , if it not catched -> chat_id=none
-    user = request.user
+    user_id = request.user.pk
     user_message = request.data.get('message') # catch the user message 
     print("user",request.user)
-    print("user.pk",request.user.pk , "type of user.pk : ",type(request.user.pk))
-    print("user.id",request.user.id , "type of user.id : ",type(request.user.id))
     if not user_message:
         return Response({"error": "Message is required"}, status=400)
 
@@ -46,7 +44,7 @@ def send_message(request):
     try:
         if not chat_id: 
             Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
-        response = message_agent(user,chat.message)
+        response = message_agent(user_id,chat.message)
     except Exception as e:
         print(f"Agent error: {e}")
         return Response({"error": "Agent failed, try again"}, status=500)
