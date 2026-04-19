@@ -5,6 +5,7 @@ models={
     "Llama4"      :"meta-llama/llama-4-maverick",
     "Llama3"      :"meta-llama/llama-3.3-70b-instruct:free",
     "gpt"         :"openai/gpt-oss-120b:free",
+    "gpt2"        : "minimax/minimax-m2.5:free",
     "gemini"      :"https://generativelanguage.googleapis.com/v1beta/openai/",
     "gemini2"     :"google/gemini-2.0-flash-exp:free",
     "deepseek02"   :"tngtech/deepseek-r1t2-chimera:free",
@@ -14,4 +15,4 @@ models={
     "nividia"     :       "nvidia/nemotron-3-super-120b-a12b:free"
 }
 
-default_model=models["gpt"]
+default_model=models["gpt2"]

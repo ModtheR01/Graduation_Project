@@ -7,6 +7,7 @@ from chat.agent import message_agent
 from rest_framework.response import Response
 from .utils import generate_title
 from threading import Thread
+from flights.state_store import get_store
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated]) # make  the end point allowed to authenticated users
@@ -35,7 +36,9 @@ def send_message(request):
             "content": user_message
         })
         chat.message = messages
-
+    store= get_store()
+    store["chat_id"] = chat.id
+    
     try:
         if not chat_id: 
             Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
@@ -72,3 +75,13 @@ def get_chat_by_id(request, chat_id):
     if not chat:
         return Response({"error": "Chat not found"}, status=404)
     return Response(chat.message)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_chat(request, chat_id):
+    chat = Chats.objects.filter(id=chat_id, user_email=request.user).first()
+    if not chat:
+        return Response({"error": "Chat not found"}, status=404)
+    chat.delete()
+    return Response({"message": "Chat deleted successfully"})

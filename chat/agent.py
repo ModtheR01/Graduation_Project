@@ -3,7 +3,7 @@ from langchain_openai import ChatOpenAI
 from .AI_models import default_model
 from .api_keys import OPENROUTER_KEY
 from .prompt import system_prompt
-from flights.views import search_flights
+from flights.views import booking_flight, search_flights
 #from sending_emails.tools import search_in_contact, add_new_contact, send_email
 #print(create_agent)
 llm = ChatOpenAI(
@@ -14,7 +14,7 @@ llm = ChatOpenAI(
     temperature=0.4,
 )
 #  , search_in_contact, add_new_contact, send_email
-tools = [search_flights]
+tools = [search_flights,booking_flight]
 agent = create_agent(llm, tools=tools)
 print("agent created ....")
 def message_agent(chat_messages):

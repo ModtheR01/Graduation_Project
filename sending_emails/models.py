@@ -21,7 +21,7 @@ class Contacts(models.Model):
 
 class Email(models.Model):
     pk = models.CompositePrimaryKey('task_id', 'to_email')
-    task = models.OneToOneField(Tasks, models.DO_NOTHING)
+    task = models.OneToOneField(Tasks, models.CASCADE, db_column='task_id')
     to_email = models.CharField(max_length=50)
     subject = models.CharField(max_length=50, blank=True, null=True)
     body = models.TextField(blank=True, null=True)

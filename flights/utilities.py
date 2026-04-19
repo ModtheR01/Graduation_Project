@@ -48,7 +48,14 @@ def get_place_id(query: str):
         "entityId": best["entityId"]
     }
 
+def generate_ticket_number():
+    from datetime import datetime
+    import random
 
+    year = datetime.now().year
+    random_num = random.randint(100000, 999999)
+
+    return f"FL-{year}-{random_num}"
 
 # if __name__ == "__main__":
 #     result = search_flights("CAI", "RUH", "2026-04-20")
