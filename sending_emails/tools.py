@@ -1,4 +1,4 @@
-from Graduation_Project.flights.state_store import get_store
+from flights.state_store import get_store
 
 from .utils import get_gmail_service
 from email.mime.text import MIMEText
