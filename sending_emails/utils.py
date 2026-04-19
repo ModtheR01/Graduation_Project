@@ -1,4 +1,5 @@
 import time
+from urllib import response
 import urllib.parse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -7,7 +8,7 @@ from django.utils import timezone as tz
 from datetime import datetime, timezone
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-
+from django.shortcuts import redirect
 from Users.models import User
 from .models import Contacts , Tokens
 import os
@@ -60,19 +61,18 @@ SCOPE = "https://www.googleapis.com/auth/gmail.send"
 
 def build_auth_url(user):
     print("in build_auth_url")
-    sk = "test123"
+    sk = os.getenv("FERNET_KEY")
     print("FERNET_KEY:", sk  ,"GOOGLE_CLIENT_ID:", GOOGLE_CLIENT_ID, "GOOGLE_REDIRECT_URI:", GOOGLE_REDIRECT_URI, "OAUTH_AUTH_URL:", OAUTH_AUTH_URL)
     if not sk:
         raise ValueError("FERNET_KEY environment variable is not set")
     print("user:", user)
-    print("user.id:", user.id)
-    print("type user.id:", type(user.id))
+    print("type user.id:", type(user))
     print("TEST JWT START")
 
     test = jwt.encode({"test": 1}, "test123", algorithm="HS256")
 
     print("TEST JWT RESULT:", test)
-    encoded_user =jwt.encode({"user_id": user.id}, sk, algorithm="HS256")
+    encoded_user = jwt.encode({"user_id": user.pk}, sk, algorithm="HS256")
     print("encoded_user:", encoded_user)
     params = {
         "client_id": GOOGLE_CLIENT_ID,
@@ -112,28 +112,23 @@ def exchange_code_for_tokens(code: str):
 
     return token_data
 
-def save_tokens(user_id, token_data: dict):
-    user = User.objects.get(id=user_id)
+def save_tokens(user_id, token_data):
+    user = User.objects.get(pk=user_id)
 
 
     access_token = token_data.get("access_token")
     refresh_token = token_data.get("refresh_token")
-    expires_at = token_data.get("expires_at")
-
-    if not refresh_token or not expires_at:
+    expiry_datetime = token_data.get("expires_at")
+    if not refresh_token or not expiry_datetime:
         raise ValueError("No refresh token or expiry time returned from Google")
-
-    expiry_datetime = datetime.fromtimestamp(expires_at, tz=timezone.utc)
-
-    token_obj, created = Tokens.objects.get_or_create(user=user)
-
-    token_obj.access_token = access_token
-
-    # ⚠️ Google ساعات مش بترجع refresh_token تاني
-    if refresh_token:
-        token_obj.refresh_token = refresh_token
-
-    token_obj.expiry = expiry_datetime
+    if Tokens.objects.filter(user=user).exists():
+        return redirect("https://romee-lake.vercel.app/")
+    token_obj = Tokens(
+        user_id=user,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expiry= datetime.fromtimestamp(expiry_datetime, tz=timezone.utc)
+    )
     token_obj.save()
 
 def get_valid_access_token(user):
