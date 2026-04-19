@@ -26,7 +26,6 @@ def stripe_webhook(request):
 
     if event["type"] == "payment_intent.succeeded": # This event is triggered when a payment is successfully completed. It contains information about the payment, including the metadata we attached when creating the PaymentIntent.
         payment_intent = event["data"]["object"]
-# ✅ استخدم to_dict() 
         payment_intent_dict = payment_intent.to_dict()
         task_id = payment_intent_dict.get("metadata", {}).get("task_id")
 
@@ -38,7 +37,6 @@ def stripe_webhook(request):
         except Tasks.DoesNotExist:
             return HttpResponse(status=404)
 
-        # ✅ الكود الجديد
         flight = task.offer_data
         time_str = flight.get("time", " → ")
         parts = time_str.split(" → ")

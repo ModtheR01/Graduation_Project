@@ -100,11 +100,9 @@ def search_flights(origin: str, destination: str, date: str):
 def booking_flight(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,email:str,phone_number:str,passport_num:str,passport_expire_date:str,nationality:str):
     """
         book a flight offer by its ID from the last search results.
-        IMPORTANT: If the tool returns a response starting with [FINAL_ANSWER], 
-        you MUST return ONLY what comes after [FINAL_ANSWER] exactly as-is.
-        Do NOT add any text, explanation, or formatting.
-        Do NOT mention the client_secret or task_id to the user.
-        Just return the raw text exactly as received.
+        IMPORTANT: If the tool returns [PAYMENT_REQUIRED], return ONLY this text as-is:
+        "Your booking is ready! The Payment will appear here, Please complete the payment."
+        Do NOT add any other text or explanation.
     """
     print("in booking tool in views")
     store= get_store()
@@ -143,27 +141,24 @@ def booking_flight(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,email:str,
     try:
         client_secret , payment_intent_id = create_payment_intent(booking, task_id=task.id)
         task.booking_data["payment_intent_id"] = payment_intent_id
+        task.booking_data["client_secret"] = client_secret 
         task.save()
+        store["pending_payment_task_id"] = task.id # we store the pending payment task id in state store to retrieve it in the chat view
         print("Payment intent created with client_secret:", client_secret)
         print("task created with ID:", task.id)
-        return f"[FINAL_ANSWER]\ntask_id:{task.id}\nclient_secret:{client_secret}"
-
+        return "[PAYMENT_REQUIRED]"
     except stripe.error.AuthenticationError:
         task.delete()
         return {"error": "Payment system configuration error."}
-
     except stripe.error.InvalidRequestError as e:
         task.delete()
         return {"error": f"Invalid payment data: {e}"}
-
     except stripe.error.APIConnectionError:
         task.delete()
         return {"error": "Cannot connect to payment provider. Try again."}
-
     except stripe.error.StripeError as e:
         task.delete()
         return {"error": "Payment error. Please try again."}
-
     except (AttributeError, KeyError) as e:
         task.delete()
         return {"error": "Booking data is incomplete."}
@@ -229,46 +224,46 @@ def get_ticket(request):
 
 
 
-def test_payment(request):
-    booking = {
-        "flight": {
-            "route": "Cairo → Dubai",
-            "price": "$120",
-            "airline": "Emirates",
-            "date": "22/12/2026",
-            "time": "10:00 → 14:00"
-        },
-        "price": "$120",
-        "user": {
-            "fname": "Test",
-            "lname": "User",
-            "email": "test@test.com",
-            "passport": "A123456",
-            "gender": "Male",
-            "nationality": "Egyptian",
-            "phone": "01012345678",
-            "birth_date": "1990-01-01",
-        },
-        "status": "pending"
-    }
+# def test_payment(request):
+#     booking = {
+#         "flight": {
+#             "route": "Cairo → Dubai",
+#             "price": "$120",
+#             "airline": "Emirates",
+#             "date": "22/12/2026",
+#             "time": "10:00 → 14:00"
+#         },
+#         "price": "$120",
+#         "user": {
+#             "fname": "Test",
+#             "lname": "User",
+#             "email": "test@test.com",
+#             "passport": "A123456",
+#             "gender": "Male",
+#             "nationality": "Egyptian",
+#             "phone": "01012345678",
+#             "birth_date": "1990-01-01",
+#         },
+#         "status": "pending"
+#     }
 
-    task = Tasks.objects.create(
-        chat_id=1,
-        task_type="flight_booking",
-        created_at=timezone.now(),
-        offer_data=booking["flight"],
-        booking_data=booking
-    )
+#     task = Tasks.objects.create(
+#         chat_id=1,
+#         task_type="flight_booking",
+#         created_at=timezone.now(),
+#         offer_data=booking["flight"],
+#         booking_data=booking
+#     )
 
-    client_secret, payment_intent_id = create_payment_intent(booking, task_id=task.id)
-    task.booking_data["payment_intent_id"] = payment_intent_id
-    task.save()  # ✅ ناقصة
+#     client_secret, payment_intent_id = create_payment_intent(booking, task_id=task.id)
+#     task.booking_data["payment_intent_id"] = payment_intent_id
+#     task.save()  # ✅ ناقصة
 
-    return JsonResponse({
-        "task_id": task.id,
-        "client_secret": client_secret,
-        "payment_intent_id": payment_intent_id
-    })
+#     return JsonResponse({
+#         "task_id": task.id,
+#         "client_secret": client_secret,
+#         "payment_intent_id": payment_intent_id
+#     })
 
 
 

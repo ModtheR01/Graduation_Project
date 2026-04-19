@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from .utils import generate_title
 from threading import Thread
 from flights.state_store import get_store
+from Tasks.models import Tasks
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated]) # make  the end point allowed to authenticated users
@@ -39,11 +40,29 @@ def send_message(request):
 
     store= get_store()
     store["chat_id"] = chat.id
+    payment_data = None
 
     try:
         if not chat_id: 
             Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
         response = message_agent(chat.message)
+        if "[PAYMENT_REQUIRED]" in response:
+            task_id = store.get("pending_payment_task_id")
+            if not task_id:
+                response = "Something went wrong. Please try again."
+            else:
+                try:
+                    task = Tasks.objects.get(id=task_id)
+                    payment_data = {
+                        "required": True,
+                        "task_id": task_id,
+                        "client_secret": task.booking_data.get("client_secret")
+                    }
+                    response = "Your booking is ready! Please complete the payment."
+                except Tasks.DoesNotExist:
+                    response = "Something went wrong. Please try again."
+                finally:
+                    store.pop("pending_payment_task_id", None)
     except Exception as e:
         print(f"Agent error: {e}")
         return Response({"error": "Agent failed, try again"}, status=500)
@@ -57,7 +76,8 @@ def send_message(request):
         "response": response,
         # "title": chat.title,
         "chat_id": chat.id,
-        "messages": chat.message 
+        "messages": chat.message ,
+        "payment_data": payment_data
     })
 
 @api_view(['GET'])
