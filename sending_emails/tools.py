@@ -70,6 +70,8 @@ def send_email(user_id, to, subject, body, is_approved=False):
     The tool does not return anything, but assumes the email is successfully sent.
     """
 
+    print("initializing Gmail service... step 3")
+    print("user_id in send_email:", user_id, "type:", type(user_id), "to:", to, "subject:", subject, "body:", body, "is_approved:", is_approved)
     service = get_gmail_service(user_id)
     print("Gmail service initialized successfully.")
     
