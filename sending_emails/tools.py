@@ -52,7 +52,7 @@ def add_new_contact(request, name, email):
 
 
 @tool
-def send_email(user, to, subject, body, is_approved=False):
+def send_email(user_id, to, subject, body, is_approved=False):
     """
     Never Send any email before making a draft and showing it to the user and the user must agree to send it 
     
@@ -65,7 +65,7 @@ def send_email(user, to, subject, body, is_approved=False):
     - subject: short subject line summarizing the email's purpose
     - body: full message content to be included in the email body
     - is_approved: check if the user approved the drafted email before actually sending it
-    - user : the user object (provided by the system)
+    - user_id : the user object (provided by the system)
 
     The tool does not return anything, but assumes the email is successfully sent.
     """
