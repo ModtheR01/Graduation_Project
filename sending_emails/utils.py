@@ -166,9 +166,10 @@ def get_valid_access_token(user):
     return new_access_token
 
 def get_gmail_service(user_id):
+    print("step 4 in get_gmail_service, user_id:", user_id ,"type:", type(user_id))
     user = User.objects.get(pk=user_id)
     access_token = get_valid_access_token(user=user)
-
+    print("access_token obtained:", access_token , "user object retrieved:", user)
     if not access_token:
         raise RuntimeError("Failed to obtain valid access token.")
 

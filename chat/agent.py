@@ -21,7 +21,9 @@ tools = [search_flights,booking_flight, send_email]
 agent = create_agent(llm, tools=tools)
 print("agent created ....")
 def message_agent(user_id,chat_messages):
+    print("in message_agent Step2 : the view is working fine" )
     messages = {"user_id":user_id,"messages": [("system", system_prompt)]}
+    print("user_id :",user_id ,"type :", type(user_id))
     for msg in chat_messages:
         messages["messages"].append((msg["role"], msg["content"]))
     response = agent.invoke(messages)["messages"][-1].content

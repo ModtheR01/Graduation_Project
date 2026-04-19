@@ -15,9 +15,9 @@ from Tasks.models import Tasks
 def send_message(request):
     chat_id = request.data.get('chat_id') # catch the chat_id will be sent by frontend developer in JSON 'in request' , if it not catched -> chat_id=none
     user_id = request.user.pk
-    print("user id in send message",user_id)
+    print("user id in send message",user_id ,type(user_id))
     user_message = request.data.get('message') # catch the user message 
-    print("user",request.user)
+    print("user",request.user ,type(request.user))
     if not user_message:
         return Response({"error": "Message is required"}, status=400)
 
