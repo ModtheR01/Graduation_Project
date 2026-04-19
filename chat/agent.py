@@ -14,6 +14,9 @@ llm = ChatOpenAI(
     base_url="https://openrouter.ai/api/v1",
     streaming=False,
     temperature=0.4,
+    model_kwargs={
+        "parallel_tool_calls": False  # ✅ امنع الـ parallel calls
+    }
 )
 #  , search_in_contact, add_new_contact, send_email
 tools = [search_flights,booking_flight, send_email]

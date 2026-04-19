@@ -676,6 +676,216 @@ displayMessage('assistant', response);
 
 ---
 
+## 🛫 Flight Booking and Payment Flow
+
+This section explains the complete flow for flight booking and payment processing. The system integrates with Stripe for secure payment handling.
+
+### 📋 Overview
+
+The booking flow involves:
+1. **Chat Interaction**: User communicates with AI assistant via chat
+2. **Flight Search**: AI searches for available flights
+3. **Booking Initiation**: User selects a flight, AI creates booking with payment intent
+4. **Payment Processing**: Frontend handles Stripe payment using client secret
+5. **Confirmation**: Webhook confirms payment and creates ticket
+6. **Ticket Retrieval**: User gets the final ticket
+
+### 🔄 Step-by-Step Flow
+
+#### Step 1: Send Chat Message (Flight Search)
+Use the existing `/chat/chat/` endpoint to start the conversation.
+
+**Example: Search for flights**
+```javascript
+const response = await fetch('http://localhost:8000/chat/chat/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+  },
+  body: JSON.stringify({
+    message: 'Find flights from Cairo to Dubai on 2026-05-10'
+  })
+});
+
+const data = await response.json();
+console.log(data.response); // AI response with flight options
+console.log(data.chat_id); // Save for continuation
+```
+
+#### Step 2: Book Selected Flight
+Continue the chat to book a specific flight.
+
+**Example: Book flight**
+```javascript
+const bookingResponse = await fetch('http://localhost:8000/chat/chat/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+  },
+  body: JSON.stringify({
+    message: 'Book flight 1 with my details: John Doe, Male, 1990-01-01, john@example.com, +1234567890, A123456789, 2027-01-01, Egyptian',
+    chat_id: data.chat_id
+  })
+});
+
+const bookingData = await bookingResponse.json();
+console.log(bookingData.response); // "Your booking is ready! Please complete the payment."
+console.log(bookingData.payment_data); // Check if payment is required
+```
+
+**Payment Data Response:**
+```json
+{
+  "response": "Your booking is ready! Please complete the payment.",
+  "chat_id": "550e8400-e29b-41d4-a716-446655440000",
+  "payment_data": {
+    "required": true,
+    "task_id": 123,
+    "client_secret": "pi_xxx_secret_xxx"
+  }
+}
+```
+
+#### Step 3: Process Payment with Stripe
+When `payment_data.required` is `true`, use the `client_secret` to process payment.
+
+**Frontend Integration (Stripe.js):**
+```html
+<!-- Include Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+```
+
+```javascript
+// Initialize Stripe
+const stripe = Stripe('your_publishable_key'); // Get from your Stripe dashboard
+
+// When payment is required
+if (bookingData.payment_data?.required) {
+  const { client_secret } = bookingData.payment_data;
+  
+  // Confirm payment
+  const result = await stripe.confirmPayment({
+    clientSecret: client_secret,
+    confirmParams: {
+      return_url: 'https://yourapp.com/payment-success', // Optional redirect
+    },
+  });
+
+  if (result.error) {
+    console.error('Payment failed:', result.error.message);
+  } else {
+    console.log('Payment succeeded!');
+    // Payment will be confirmed via webhook
+  }
+}
+```
+
+**Note:** Replace `'your_publishable_key'` with your actual Stripe publishable key.
+
+#### Step 4: Payment Confirmation (Webhook)
+Stripe automatically sends a webhook to confirm payment. No frontend action needed.
+
+**Webhook Endpoint:** `POST /payment/webhook/stripe`
+- This is handled server-side
+- Updates booking status to "confirmed"
+- Creates travel record
+
+#### Step 5: Get Ticket
+After payment confirmation, retrieve the ticket.
+
+**Endpoint:** `GET /flights/get_ticket/?task_id=<task_id>`
+
+**Example:**
+```javascript
+const ticketResponse = await fetch(`http://localhost:8000/flights/get_ticket/?task_id=${bookingData.payment_data.task_id}`, {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+  }
+});
+
+const ticketData = await ticketResponse.json();
+console.log(ticketData.ticket);
+```
+
+**Success Response:**
+```json
+{
+  "ticket": {
+    "passenger": {
+      "fname": "John",
+      "lname": "Doe",
+      "gender": "Male",
+      "passport": "A123456789",
+      "nationality": "Egyptian"
+    },
+    "flight": {
+      "ticket_number": "ABC123456",
+      "airline": "Emirates",
+      "route": "Cairo → Dubai",
+      "date": "2026-05-10",
+      "time": "10:00 → 14:00",
+      "price": "$285"
+    },
+    "status": "confirmed"
+  }
+}
+```
+
+### 🎯 Key Functions Involved
+
+#### `send_message` (chat/views.py)
+- Handles chat messages
+- Detects payment requirements
+- Returns payment data to frontend
+
+#### `booking_flight` (flights/views.py)
+- Creates booking task
+- Generates Stripe payment intent
+- Returns `[PAYMENT_REQUIRED]` to trigger payment flow
+
+#### `create_payment_intent` (payment/utils.py)
+- Creates Stripe PaymentIntent
+- Converts price to cents
+- Attaches metadata for tracking
+
+#### `stripe_webhook` (payment/views.py)
+- Receives payment confirmations from Stripe
+- Updates task status
+- Creates Traveling record for ticket
+
+#### `get_ticket` (flights/views.py)
+- Retrieves final ticket after payment
+- Validates payment confirmation
+- Returns passenger and flight details
+
+### ⚠️ Important Notes
+
+- **Authentication**: All endpoints require JWT token
+- **Payment Security**: Never handle payment processing on frontend only
+- **Webhook**: Must be configured in Stripe dashboard pointing to `/payment/webhook/`
+- **Client Secret**: Use immediately and only once
+- **Error Handling**: Check for payment failures and retry if needed
+- **Status Checks**: Use `get_ticket` to verify payment before showing ticket
+
+### 🔧 Frontend Implementation Tips
+
+1. **Monitor Payment Data**: Always check `response.payment_data` in chat responses
+2. **Stripe Integration**: Load Stripe.js and initialize with your publishable key
+3. **User Feedback**: Show loading states during payment processing
+4. **Error Recovery**: Handle payment failures gracefully
+5. **Ticket Display**: Only show ticket after successful `get_ticket` call
+
+### 📊 Status Flow
+
+```
+User Message → AI Search → Flight Selection → Booking Creation → Payment Intent → Stripe Payment → Webhook → Status Update → Ticket Available
+```
+
+---
+
 ## ❓ FAQ
 
 **Q: What is JWT?**  
