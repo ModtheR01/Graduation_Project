@@ -17,14 +17,16 @@ llm = ChatOpenAI(
 )
 #  , search_in_contact, add_new_contact, send_email
 tools = [search_flights,booking_flight, send_email]
-#tools = [search_flights,send_email] 
+
 agent = create_agent(llm, tools=tools)
 print("agent created ....")
-def message_agent(user_id,chat_messages):
-    print("in message_agent Step2 : the view is working fine" )
-    messages = {"user_id":user_id,"messages": [("system", system_prompt)]}
-    print("user_id :",user_id ,"type :", type(user_id))
+
+def message_agent(chat_messages):
+    print("in message_agent Step2" )
+
+    messages = {"messages": [("system", system_prompt)]}
     for msg in chat_messages:
         messages["messages"].append((msg["role"], msg["content"]))
+
     response = agent.invoke(messages)["messages"][-1].content
     return response if response else "Sorry, I am a bit confused. Can you rephrase?"
