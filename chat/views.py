@@ -16,6 +16,8 @@ def send_message(request):
     user = request.user
     user_message = request.data.get('message') # catch the user message 
     print("user",request.user)
+    print("user.pk",request.user.pk , "type of user.pk : ",type(request.user.pk))
+    print("user.id",request.user.id , "type of user.id : ",type(request.user.id))
     if not user_message:
         return Response({"error": "Message is required"}, status=400)
 

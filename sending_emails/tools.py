@@ -71,6 +71,7 @@ def send_email(user, to, subject, body, is_approved=False):
     """
 
     service = get_gmail_service(user)
+    print("Gmail service initialized successfully.")
     
     # Create MIME email
     # telling the api the body is in plain text not html also createing the mime object to hold other data
