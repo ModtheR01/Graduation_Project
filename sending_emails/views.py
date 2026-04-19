@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 import jwt
 from .utils import build_auth_url , exchange_code_for_tokens , save_tokens
-from .models import Contacts
+from .models import Contacts ,Tokens
 from .serializers import contact_serializer
 from rest_framework.exceptions import PermissionDenied
 
@@ -102,33 +102,19 @@ def google_callback(request):
 
     return redirect("https://romee-lake.vercel.app/") 
 
-# def google_callback(request):
-#     code = request.GET.get("code")
-#     data = request.GET.get("state")
-#     print("code:", code, "state:", data)
 
-#     if not code:
-#         return Response({"error": "No code provided"}, status=400)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def is_connected(request):
+    user = request.user
 
-#     # Decode the state parameter to get the user ID
-#     try:
-#         sk = os.getenv("FERNET_KEY")
-#         if not sk:
-#             raise ValueError("FERNET_KEY environment variable is not set")
+    token = Tokens.objects.filter(user=user).first()
 
-#         decoded_data = jwt.decode(data, sk, algorithms=["HS256"])
-#         print("decoded_data:", decoded_data)
-#         user_id = decoded_data.get("user_id")
-#         print("user_id:", user_id)
-#     except jwt.InvalidTokenError:
-#         return Response({"error": "Invalid state parameter"}, status=400)
+    if not token:
+        return Response({
+            "is_connected": False
+        })
 
-#     tokens_data = exchange_code_for_tokens(code)
-#     print("tokens_data:", tokens_data)
-#     save_tokens(user_id, tokens_data)
-
-#     return Response({"message": "Google account connected successfully"})
-
-
-# functions(not endpoints) for the ai tool to call will be in the utils file to be called by the ai when needed and these functions will interact with the database and return the needed data to the ai to make decisions based on it
-  
+    return Response({
+        "is_connected": True,
+    })
