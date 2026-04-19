@@ -62,6 +62,7 @@ def send_email( to, subject, body, is_approved=False):
 
     Use this tool whenever the user asks to send an email, write an email, or deliver a message via email.
 
+    
     Required parameters:
     - to: recipient's email address (must be a valid email format, e.g., "example@gmail.com")
     - subject: short subject line summarizing the email's purpose
