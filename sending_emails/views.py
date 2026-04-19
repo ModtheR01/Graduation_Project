@@ -102,6 +102,7 @@ def google_callback(request):
 
     return redirect("https://romee-lake.vercel.app/") 
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def is_connected(request):
