@@ -36,9 +36,10 @@ def send_message(request):
             "content": user_message
         })
         chat.message = messages
+
     store= get_store()
     store["chat_id"] = chat.id
-    
+
     try:
         if not chat_id: 
             Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
