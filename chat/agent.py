@@ -21,7 +21,7 @@ llm = ChatOpenAI(
 #  , search_in_contact, add_new_contact, send_email
 tools = [search_flights,booking_flight, send_email]
 #tools = [search_flights,send_email] 
-agent = create_agent(llm, tools=tools)
+agent = create_agent(llm, tools=tools,max_iterations=1)
 print("agent created ....")
 def message_agent(user_id,chat_messages):
     print("in message_agent Step2 : the view is working fine" )

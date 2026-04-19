@@ -36,7 +36,7 @@ def search_flights(origin: str, destination: str, date: str):
         You MUST call the tool and return its response as-is.
         If the tool output starts with [FINAL_ANSWER], you MUST return everything after it exactly as-is.
     """
-    print("in tool in views")
+    print("🔥 search_flights CALLED")
     origin_ids = get_place_id(origin)
     dest_ids = get_place_id(destination)
 
@@ -77,6 +77,8 @@ def search_flights(origin: str, destination: str, date: str):
             "direct": leg["stopCount"] == 0,
             "stops": leg["stopCount"]
         })
+    if not flights:
+        return "[FINAL_ANSWER]\nNo flights found for this route/date."
     flights_text = f"{origin} → {destination} | {date}\n"
     for i, f in enumerate(flights, 1):
         stops = "Direct" if f["direct"] else f"{f['stops']} Stop(s)"
