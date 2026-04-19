@@ -52,9 +52,9 @@ def add_new_contact(request, name, email):
 
 
 @tool
-def send_email(request, to, subject, body, is_approved=False):
+def send_email(user, to, subject, body, is_approved=False):
     """
-    Never Send any email before make a draft and shoe it to the user and the user must agree to send it 
+    Never Send any email before making a draft and showing it to the user and the user must agree to send it 
     
     Send an email using Gmail.
 
@@ -65,12 +65,12 @@ def send_email(request, to, subject, body, is_approved=False):
     - subject: short subject line summarizing the email's purpose
     - body: full message content to be included in the email body
     - is_approved: check if the user approved the drafted email before actually sending it
-    - request : the request object to get the user data send it as is wothout changing anything in it
+    - user : the user object (provided by the system)
 
     The tool does not return anything, but assumes the email is successfully sent.
     """
 
-    service = get_gmail_service(request)
+    service = get_gmail_service(user)
     
     # Create MIME email
     # telling the api the body is in plain text not html also createing the mime object to hold other data

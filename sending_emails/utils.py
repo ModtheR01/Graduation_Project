@@ -165,13 +165,13 @@ def get_valid_access_token(user):
 
     return new_access_token
 
-def get_gmail_service(request):
-    access_token = get_valid_access_token(user=request.user)
+def get_gmail_service(user):
+    access_token = get_valid_access_token(user=user)
 
     if not access_token:
         raise RuntimeError("Failed to obtain valid access token.")
 
-    token_obj = Tokens.objects.get(user=request.user)
+    token_obj = Tokens.objects.get(user=user)
     refresh_token = token_obj.get_refresh_token()
 
     creds = Credentials(
