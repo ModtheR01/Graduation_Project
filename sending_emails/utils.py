@@ -165,7 +165,8 @@ def get_valid_access_token(user):
 
     return new_access_token
 
-def get_gmail_service(user):
+def get_gmail_service(user_id):
+    user = User.objects.get(pk=user_id)
     access_token = get_valid_access_token(user=user)
 
     if not access_token:

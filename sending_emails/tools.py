@@ -70,7 +70,7 @@ def send_email(user, to, subject, body, is_approved=False):
     The tool does not return anything, but assumes the email is successfully sent.
     """
 
-    service = get_gmail_service(user)
+    service = get_gmail_service(user_id)
     print("Gmail service initialized successfully.")
     
     # Create MIME email
