@@ -7,4 +7,5 @@ urlpatterns=[
     path("login/google/",views.login_with_google),
     path("user_info/",views.user_info),
     path('update_user_info/', views.update_user_info),
+    path('delete_user/', views.delete_user),
 ]

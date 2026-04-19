@@ -278,7 +278,130 @@ localStorage.setItem('accessToken', data.access);
 
 ---
 
-### 💬 Send Chat Message
+### �️ Delete User Account
+
+**Endpoint:** `https://romee.up.railway.app/Users/delete_user/`
+
+**Method:** `DELETE`
+
+**Description:** Permanently delete the authenticated user's account.
+
+**Authentication:** ✅ Required (JWT Token)
+
+**Headers:**
+
+```http
+Authorization: Bearer <your_access_token>
+```
+
+**Request Body:** None
+
+**Example Request (cURL):**
+
+```bash
+curl -X DELETE http://localhost:8000/Users/delete_user/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const response = await fetch('http://localhost:8000/Users/delete_user/', {
+  method: 'DELETE',
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+  "message": "User account deleted successfully"
+}
+```
+
+**Error Responses:**
+
+❌ **Missing authentication (401 Unauthorized):**
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+---
+
+### 🗑️ Delete Chat
+
+**Endpoint:** `https://romee.up.railway.app/chat/delete_chat/<chat_id>/`
+
+**Method:** `DELETE`
+
+**Description:** Delete a specific chat for the authenticated user.
+
+**Authentication:** ✅ Required (JWT Token)
+
+**Headers:**
+
+```http
+Authorization: Bearer <your_access_token>
+```
+
+**Request Body:** None
+
+**Example Request (cURL):**
+
+```bash
+curl -X DELETE http://localhost:8000/chat/delete_chat/550e8400-e29b-41d4-a716-446655440000/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const response = await fetch(`http://localhost:8000/chat/delete_chat/${chatId}/`, {
+  method: 'DELETE',
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+  "message": "Chat deleted successfully"
+}
+```
+
+**Error Responses:**
+
+❌ **Chat not found (404 Not Found):**
+```json
+{
+  "error": "Chat not found"
+}
+```
+
+❌ **Missing authentication (401 Unauthorized):**
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+---
+
+### �💬 Send Chat Message
 
 **Endpoint:** `https://romee.up.railway.app/chat/chat/`
 

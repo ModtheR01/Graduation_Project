@@ -77,9 +77,6 @@ def update_user_info(request):
     user.save()
     return Response({'message': 'User information updated successfully'})
 
-
-
-
 @api_view(['POST'])
 def login_with_google(request):
 
@@ -156,3 +153,10 @@ def login_with_google(request):
         'message': 'Login Successfully',
         'is_new_user': created,
     })
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_user(request):
+    user = request.user
+    user.delete()
+    return Response({'message': 'User account deleted successfully'})

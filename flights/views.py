@@ -1,9 +1,17 @@
+from asyncio import Task
+from django.utils import timezone
 from urllib import response
+from django.http import JsonResponse
 import requests
 from langchain_core.tools import tool
+import stripe
 from flights.state_store import get_store
 from chat.api_keys import XRapidAPIKey
 from .utilities import get_place_id
+from payment.utils import create_payment_intent
+from Tasks.models import Tasks
+from flights.models import Traveling
+
 print("in views")
 HEADERS = {
     "x-rapidapi-key": XRapidAPIKey,
@@ -61,6 +69,7 @@ def search_flights(origin: str, destination: str, date: str):
         flights.append({
             "id": i,
             "route": f"{origin} → {destination}",
+            "date": date,
             "time": f"{leg['departure'][11:16]} → {leg['arrival'][11:16]}",
             "duration": f"{hours}h {minutes}m",
             "price": f"${int(item['price']['amount'])}",
@@ -87,33 +96,179 @@ def search_flights(origin: str, destination: str, date: str):
 # if __name__ == "__main__":
 #     print(search_flights("Cairo", "Riyadh", "2026-05-10"))
 
-
 @tool
-def booking_flight(offer_id:int):
+def booking_flight(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,email:str,phone_number:str,passport_num:str,passport_expire_date:str,nationality:str):
     """
-    book a flight offer by its ID from the last search results.
+        book a flight offer by its ID from the last search results.
+        IMPORTANT: If the tool returns a response starting with [FINAL_ANSWER], 
+        you MUST return ONLY what comes after [FINAL_ANSWER] exactly as-is.
+        Do NOT add any text, explanation, or formatting.
+        Do NOT mention the client_secret or task_id to the user.
+        Just return the raw text exactly as received.
     """
+    print("in booking tool in views")
     store= get_store()
-    offer = store["last_"]
+    offer = store.get("last_offers", {}).get(offer_id)  # Safely get the selected offer:- If "last_offers" exists → use it- If not → use empty dict {} to avoid crash- Then try to get offer_id → returns None if not found (no error)
+
+    if not offer:
+        return {"error": "Invalid offer ID"}
+    print("SELECTED OFFER:", offer)
+
+    booking = {
+        "flight": offer,
+        "price": offer["price"],
+        "user": {
+            "fname": Fname,
+            "lname": Lname,
+            "gender": gender,
+            "birth_date": BD,
+            "email": email,
+            "phone": phone_number,
+            "passport": passport_num,
+            "passport_expire": passport_expire_date,
+            "nationality": nationality
+        },
+        "status": "pending"
+    }
+
+    chat_id = store.get("chat_id") # in view of chat we store the chat_id in state store after creating a new chat or getting an existing one
+    task=Tasks.objects.create(
+        chat_id=chat_id,
+        task_type="flight_booking",
+        created_at=timezone.now(),
+        offer_data=offer,        
+        booking_data=booking,  
+    )
+
+    try:
+        client_secret , payment_intent_id = create_payment_intent(booking, task_id=task.id)
+        task.booking_data["payment_intent_id"] = payment_intent_id
+        task.save()
+        print("Payment intent created with client_secret:", client_secret)
+        print("task created with ID:", task.id)
+        return f"[FINAL_ANSWER]\ntask_id:{task.id}\nclient_secret:{client_secret}"
+
+    except stripe.error.AuthenticationError:
+        task.delete()
+        return {"error": "Payment system configuration error."}
+
+    except stripe.error.InvalidRequestError as e:
+        task.delete()
+        return {"error": f"Invalid payment data: {e}"}
+
+    except stripe.error.APIConnectionError:
+        task.delete()
+        return {"error": "Cannot connect to payment provider. Try again."}
+
+    except stripe.error.StripeError as e:
+        task.delete()
+        return {"error": "Payment error. Please try again."}
+
+    except (AttributeError, KeyError) as e:
+        task.delete()
+        return {"error": "Booking data is incomplete."}
+
+
+
+def get_ticket(request):
+    task_id = request.GET.get("task_id")
+
+    if not task_id:
+        return JsonResponse({"error": "task_id is required"}, status=400)
+
+    try:
+        task = Tasks.objects.get(id=task_id)
+    except Tasks.DoesNotExist:
+        return JsonResponse({"error": "Task not found"}, status=404)
+
+    if task.booking_data.get("status") != "confirmed":
+        payment_intent_id = task.booking_data.get("payment_intent_id")
+
+        if not payment_intent_id:
+            return JsonResponse({"error": "Payment not initiated"}, status=400)
+
+        try:
+            intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+            if intent.status == "succeeded":
+                task.booking_data["status"] = "confirmed"
+                task.save()
+        except stripe.error.StripeError:
+            return JsonResponse({"error": "Could not verify payment"}, status=500)
+
+    if task.booking_data.get("status") != "confirmed":
+        return JsonResponse({"error": "Payment not confirmed yet"}, status=402)
+
+    flight = task.offer_data
+    booking = task.booking_data
+
+    traveling = Traveling.objects.filter(task_id=task.id).first()
+    if not traveling:
+        return JsonResponse({"error": "Ticket not ready yet"}, status=404)
+
+    return JsonResponse({
+        "ticket": {
+            "passenger": {
+                "fname": booking["user"].get("fname"),
+                "lname": booking["user"].get("lname"),
+                "gender": booking["user"].get("gender"),
+                "passport": booking["user"].get("passport"),
+                "nationality": booking["user"].get("nationality"),
+            },
+            "flight": {
+                "ticket_number": traveling.ticket_num,
+                "airline": flight.get("airline"),
+                "route": flight.get("route"),
+                "date": flight.get("date"),
+                "time": flight.get("time"),
+                "price": flight.get("price"),
+            },
+            "status": booking.get("status"),
+        }
+    })
 
 
 
 
+def test_payment(request):
+    booking = {
+        "flight": {
+            "route": "Cairo → Dubai",
+            "price": "$120",
+            "airline": "Emirates",
+            "date": "22/12/2026",
+            "time": "10:00 → 14:00"
+        },
+        "price": "$120",
+        "user": {
+            "fname": "Test",
+            "lname": "User",
+            "email": "test@test.com",
+            "passport": "A123456",
+            "gender": "Male",
+            "nationality": "Egyptian",
+            "phone": "01012345678",
+            "birth_date": "1990-01-01",
+        },
+        "status": "pending"
+    }
 
+    task = Tasks.objects.create(
+        chat_id=1,
+        task_type="flight_booking",
+        created_at=timezone.now(),
+        offer_data=booking["flight"],
+        booking_data=booking
+    )
 
+    client_secret, payment_intent_id = create_payment_intent(booking, task_id=task.id)
+    task.booking_data["payment_intent_id"] = payment_intent_id
+    task.save()  # ✅ ناقصة
 
-
-
-
-
-
-
-
-
-
-
-
-
+    return JsonResponse({
+        "task_id": task.id,
+        "client_secret": client_secret,
+        "payment_intent_id": payment_intent_id
+    })
 
 
 
