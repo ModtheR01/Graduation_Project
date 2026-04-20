@@ -39,6 +39,8 @@ def search_flights(origin: str, destination: str, date: str):
         - Even if the user speaks Arabic, DO NOT translate airline names, times, prices, or formatting.
         - If the tool output starts with [FINAL_ANSWER], you MUST return everything after it EXACTLY as-is.
         - The language rule applies ONLY to normal conversation text, NOT to structured flight results.
+        you must follow this format:
+            "Here are the available flights from Cairo to Casablanca on 24/4/2026:\n\n| # | Route | Date | Time | Duration | Price | Airline | Direct |\n|---|-------|------|------|----------|-------|---------|--------|\n| 1 | Cairo → Casablanca | 2026-04-24 | 09:00 → 12:30 | 5h 30m | $465 | EgyptAir | ✅ Yes |\n| 2 | Cairo → Casablanca | 2026-04-24 | 16:20 → 00:20 | 10h 0m | $326 | Lufthansa | ❌ 1 stop |\n| 3 | Cairo → Casablanca | 2026-04-24 | 09:40 → 13:30 | 5h 50m | $453 | Royal Air Maroc | ✅ Yes |\n Would you like to book any of these flights? Just let me know which one!"
     """
     print("🔥 search_flights CALLED")
     origin_ids = get_place_id(origin)
