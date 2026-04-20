@@ -23,7 +23,198 @@ Authorization: Bearer <your_access_token>
 
 ---
 
-## 📚 All Endpoints
+## � Password Reset
+
+The password reset flow involves two steps: requesting a reset link via email, and then resetting the password using the link.
+
+### Step 1: Request Password Reset
+
+**Endpoint:** `https://romee.up.railway.app/Users/forgot-password/`
+
+**Method:** `POST`
+
+**Description:** Send a password reset link to the user's email address.
+
+**Authentication:** ❌ Not required
+
+**Request Body:**
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Field Details:**
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| email | string | ✅ | Registered email address |
+
+**Example Request (cURL):**
+
+```bash
+curl -X POST http://localhost:8000/Users/forgot-password/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com"
+  }'
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const response = await fetch('http://localhost:8000/Users/forgot-password/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'john@example.com'
+  })
+});
+
+const data = await response.json();
+console.log(data.message); // Always returns success message for security
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+  "message": "If this email exists, a reset link was sent."
+}
+```
+
+**Notes:**
+- The response is always the same for security reasons (to prevent email enumeration)
+- If the email exists, a reset link is sent to the user's email
+- The reset link format: `https://romee-lake.vercel.app/reset-password/{uid}/{token}/`
+- **Frontend Implementation:** Create a page at `/reset-password/{uid}/{token}` that extracts `uid` and `token` from the URL parameters and allows the user to enter a new password
+
+### Step 2: Reset Password
+
+**Endpoint:** `https://romee.up.railway.app/Users/reset-password/`
+
+**Method:** `POST`
+
+**Description:** Reset the user's password using the uid and token from the reset link.
+
+**Authentication:** ❌ Not required
+
+**Request Body:**
+
+```json
+{
+  "uid": "encoded_user_id",
+  "token": "reset_token",
+  "new_password": "NewSecurePassword123"
+}
+```
+
+**Field Details:**
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| uid | string | ✅ | Encoded user ID from the reset link URL |
+| token | string | ✅ | Reset token from the reset link URL |
+| new_password | string | ✅ | New password (minimum 6 characters) |
+
+**Example Request (cURL):**
+
+```bash
+curl -X POST http://localhost:8000/Users/reset-password/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "uid": "MQ",
+    "token": "abc123def456",
+    "new_password": "NewPassword123"
+  }'
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+// Extract uid and token from URL (e.g., /reset-password/MQ/abc123def456)
+const urlParams = window.location.pathname.split('/');
+const uid = urlParams[2]; // MQ
+const token = urlParams[3]; // abc123def456
+
+const response = await fetch('http://localhost:8000/Users/reset-password/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    uid: uid,
+    token: token,
+    new_password: 'NewSecurePassword123'
+  })
+});
+
+const data = await response.json();
+if (response.ok) {
+  console.log('Password reset successful');
+  // Redirect to login page
+} else {
+  console.error('Error:', data.error);
+}
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+  "message": "Password reset successful"
+}
+```
+
+**Error Responses:**
+
+❌ **Invalid link (400 Bad Request):**
+```json
+{
+  "error": "Invalid link"
+}
+```
+
+❌ **Invalid or expired token (400 Bad Request):**
+```json
+{
+  "error": "Invalid or expired token"
+}
+```
+
+❌ **Password too weak (400 Bad Request):**
+```json
+{
+  "error": "Password too weak"
+}
+```
+
+### Frontend Implementation Guide
+
+1. **Forgot Password Page:**
+   - Form with email input
+   - Submit to `/Users/forgot-password/`
+   - Show success message (don't indicate if email exists or not)
+
+2. **Reset Password Page:**
+   - URL: `/reset-password/{uid}/{token}`
+   - Extract `uid` and `token` from URL
+   - Form with new password input
+   - Submit to `/Users/reset-password/` with uid, token, and new_password
+   - On success, redirect to login page
+   - Handle errors (invalid link, expired token, weak password)
+
+3. **Security Notes:**
+   - Reset links expire after a certain time
+   - Links can only be used once
+   - Always validate password strength on frontend before submission
+
+---
+
+## �📚 All Endpoints
 
 ### 1️⃣ Sign Up (Create New Account)
 

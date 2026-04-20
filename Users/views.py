@@ -10,6 +10,12 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from chat.api_keys import AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_CLIENT_SECRET, AUTH_GOOGLE_REDIRECT_URI
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.password_validation import validate_password
 
 # Create your views here.
 @api_view(['POST'])
@@ -160,3 +166,56 @@ def delete_user(request):
     user = request.user
     user.delete()
     return Response({'message': 'User account deleted successfully'})
+
+
+@api_view(['POST'])
+def forgot_password(request):
+    email = request.data.get('email')
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"message": "If this email exists, a reset link was sent."})
+
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+
+    reset_link = f"https://romee-lake.vercel.app/reset-password/{uid}/{token}/"
+
+    send_mail(
+        subject="Reset Your Password",
+        message=f"Click here to reset your password:\n{reset_link}",
+        from_email="romee.agent@gmail.com",
+        recipient_list=[email],
+    )
+
+    return Response({"message": "If this email exists, a reset link was sent."})
+
+
+@api_view(['POST'])
+def reset_password(request):
+    uid = request.data.get("uid")
+    token = request.data.get("token")
+    new_password = request.data.get("new_password")
+
+    if not new_password or len(new_password) < 6:
+        return Response({"error": "Password too weak"}, status=400)
+
+    try:
+        email = urlsafe_base64_decode(uid).decode()
+        user = User.objects.get(email=email)
+    except Exception:
+        return Response({"error": "Invalid link"}, status=400)
+
+    if not default_token_generator.check_token(user, token):
+        return Response({"error": "Invalid or expired token"}, status=400)
+
+    try:
+        validate_password(new_password)
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)
+
+    user.set_password(new_password)
+    user.save()
+
+    return Response({"message": "Password reset successful"}, status=200)
