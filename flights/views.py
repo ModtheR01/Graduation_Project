@@ -91,12 +91,12 @@ def search_flights(origin: str, destination: str, date: str):
         {f['price']}
         {stops}
         """
-
+    
     store = get_store()
     store["last_offers"] = {f["id"]: f for f in flights}
     print("ALL OFFERS:", store["last_offers"].get(2))
     print("TOOL RESULT:", flights_text)
-    return f"[FINAL_ANSWER]\n{flights_text.strip()}"
+    return f"[FINAL_ANSWER]\n{flights}"
 
 
 # if __name__ == "__main__":
