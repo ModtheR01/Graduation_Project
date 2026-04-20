@@ -48,6 +48,7 @@ def send_message(request):
         if not chat_id: 
             Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
         response = message_agent(chat.message)
+        print("Agent response:", response)
         if "[PAYMENT_REQUIRED]" in response:
             task_id = store.get("pending_payment_task_id")
             if not task_id:
