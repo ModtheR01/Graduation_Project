@@ -144,6 +144,7 @@ def login_with_google(request):
         defaults={
             'fname': first_name,
             'lname': last_name,
+            "phone_number":""
         }
     )
 
