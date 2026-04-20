@@ -149,7 +149,7 @@ def login_with_google(request):
             "city" : "",
             "birth_date" : "",
             "street" :"",
-            "created_at": "",
+            "created_at": "2026-05-12",
             "country_code":"",
 
         }
