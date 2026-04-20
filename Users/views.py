@@ -144,7 +144,14 @@ def login_with_google(request):
         defaults={
             'fname': first_name,
             'lname': last_name,
-            "phone_number":""
+            "phone_number":"",
+            "country" : "",
+            "city" : "",
+            "birth_date" : "",
+            "street" :"",
+            "created_at": "",
+            "country_code":"",
+
         }
     )
 
