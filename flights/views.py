@@ -96,7 +96,7 @@ def search_flights(origin: str, destination: str, date: str):
     store["last_offers"] = {f["id"]: f for f in flights}
     print("ALL OFFERS:", store["last_offers"].get(2))
     print("TOOL RESULT:", flights_text)
-    return flights
+    return f"[FINAL_ANSWER]{flights}"
 
 
 # if __name__ == "__main__":
