@@ -2,7 +2,6 @@ from chat.api_keys import XRapidAPIKey_hotels
 import requests
 import json
 
-print("in utilities")
 HEADERS = {
     "x-rapidapi-key": XRapidAPIKey_hotels,
     "x-rapidapi-host": 'booking-com15.p.rapidapi.com'
@@ -56,7 +55,7 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
     data = response.json()
     hotels = data.get("data", {}).get("hotels", [])
     result = []
-    for h in hotels:
+    for h in hotels[:5]:
         p = h.get("property", {})
         images = p.get("photoUrls", [])
         if len(images) >= 2:
