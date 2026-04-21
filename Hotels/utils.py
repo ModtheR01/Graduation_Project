@@ -89,4 +89,4 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
     return json.dumps({"hotels": result}, ensure_ascii=False)
 
 
-print(func_search_hotels("cairo","2026-05-01","2026-05-05",2,1))
+#print(func_search_hotels("cairo","2026-05-01","2026-05-05",2,1))
