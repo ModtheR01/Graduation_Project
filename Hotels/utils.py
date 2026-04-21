@@ -1,10 +1,10 @@
-from chat.api_keys import XRapidAPIKey
+from chat.api_keys import XRapidAPIKey_hotels
 import requests
 import json
 
 print("in utilities")
 HEADERS = {
-    "x-rapidapi-key": XRapidAPIKey,
+    "x-rapidapi-key": XRapidAPIKey_hotels,
     "x-rapidapi-host": 'booking-com15.p.rapidapi.com'
 }
 
@@ -38,10 +38,6 @@ def get_dest_id(query: str):
 
 def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms):
     url = "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels"
-    headers = {
-        "X-RapidAPI-Key": XRapidAPIKey,
-        "X-RapidAPI-Host": "booking-com15.p.rapidapi.com"
-    }
     dest = get_dest_id(country)
     dest_id = dest["dest_id"]
     dest_type = dest["dest_type"]
@@ -56,7 +52,7 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
         "languagecode": "en-us",
         "currency_code": "USD"
     }
-    response = requests.get(url, headers=headers, params=params)
+    response = requests.get(url, headers=HEADERS, params=params)
     data = response.json()
     hotels = data.get("data", {}).get("hotels", [])
     result = []
