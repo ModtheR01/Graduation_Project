@@ -100,10 +100,10 @@ def func_search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
 
     
     print("status:", response.status_code)
-    print("response:", response.text[:500])
+    print("result from tool:",result )
     #print(result)
 
     return result
 
 
-#print(search_hotels("cairo","2026-05-01","2026-05-05",2,1))
+print(func_search_hotels("cairo","2026-05-01","2026-05-05",2,1))
