@@ -38,19 +38,8 @@ def search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
     try:
         info_of_hotels = func_search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms)
         if not info_of_hotels:
-            return {
-                "status": "error",
-                "message": "No hotels found",
-                "data": []  
-            }
-        return {
-            "status": "success",   
-            "data": info_of_hotels
-        }
+            return "no hotels found"
+        return f"[FINAL_ANSWER]{info_of_hotels}"
     except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e),
-            "data": []   # ✅ ثابت
-        }
+        return f"message: {str(e)}"
 

@@ -1,6 +1,6 @@
 from chat.api_keys import XRapidAPIKey
 import requests
-
+import json
 
 print("in utilities")
 HEADERS = {
@@ -36,50 +36,39 @@ def get_dest_id(query: str):
     }
 
 
-def func_search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
+def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms):
     url = "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels"
-
     headers = {
         "X-RapidAPI-Key": XRapidAPIKey,
         "X-RapidAPI-Host": "booking-com15.p.rapidapi.com"
     }
-    dest=get_dest_id(country)
-    dest_id=dest["dest_id"]
-    dest_type=dest["dest_type"]
-
+    dest = get_dest_id(country)
+    dest_id = dest["dest_id"]
+    dest_type = dest["dest_type"]
     params = {
         "dest_id": dest_id,
-        "search_type": dest_type.upper(),  # 🔥 مهم
-        "arrival_date":arr_date ,           #"2026-05-01"
-        "departure_date": dep_date,              #"2026-05-05",
+        "search_type": dest_type.upper(),
+        "arrival_date": arr_date,
+        "departure_date": dep_date,
         "adults": num_of_adults,
         "room_qty": num_of_rooms,
         "page_number": 1,
         "languagecode": "en-us",
         "currency_code": "USD"
     }
-
     response = requests.get(url, headers=headers, params=params)
     data = response.json()
-
     hotels = data.get("data", {}).get("hotels", [])
-
     result = []
-
     for h in hotels:
         p = h.get("property", {})
-
         images = p.get("photoUrls", [])
         if len(images) >= 2:
             selected_images = images[:2]
         elif len(images) == 1:
             selected_images = [images[0], images[0]]
         else:
-            selected_images = [
-                "https://via.placeholder.com/300",
-                "https://via.placeholder.com/300"
-            ]
-
+            selected_images = ["https://via.placeholder.com/300", "https://via.placeholder.com/300"]
         hotel = {
             "id": h.get("hotel_id"),
             "name": p.get("name"),
@@ -95,15 +84,9 @@ def func_search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
                 "checkout_until": p.get("checkout", {}).get("untilTime"),
             }
         }
-
         result.append(hotel)
 
-    
-    print("status:", response.status_code)
-    print("result from tool:",result )
-    #print(result)
-
-    return result
+    return json.dumps({"hotels": result}, ensure_ascii=False)
 
 
 print(func_search_hotels("cairo","2026-05-01","2026-05-05",2,1))
