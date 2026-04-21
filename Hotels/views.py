@@ -17,14 +17,18 @@ def search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
 
     Parameters:
     - country (str): Name of the city or country (e.g., "Cairo", "Paris").
-    - arr_date (str): Check-in date.
-    - dep_date (str): Check-out date.
+    - arr_date (str): Check-in date. (always make the date in this format YYYY-MM-DD)
+    - dep_date (str): Check-out date. (always make the date in this format YYYY-MM-DD) 
     - num_of_adults (int): Number of adults.
     - num_of_rooms (int): Number of rooms.
+    Notes:
+    - The function ALWAYS returns this exact Python dict structure.
+    - "images" will always contain exactly 2 image URLs.
+    - Date format is flexible in separators ("-", "/", "."),
+        but MUST follow: day → month → year (DD-MM-YYYY).
 
     Returns:
     - A Python dictionary with the following fixed structure:
-
         {
             "status": "success",
             "data": [
@@ -45,12 +49,6 @@ def search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
                 }
             ]
         }
-
-    Notes:
-    - The function ALWAYS returns this exact Python dict structure.
-    - "images" will always contain exactly 2 image URLs.
-    - Date format is flexible in separators ("-", "/", "."),
-        but MUST follow: day → month → year (DD-MM-YYYY).
 
     Example:
         {
