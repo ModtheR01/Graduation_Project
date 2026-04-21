@@ -100,7 +100,7 @@ def func_search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
 
     
     print("status:", response.status_code)
-    # print("response:", response.text[:500])
+    print("response:", response.text[:500])
     #print(result)
 
     return result
