@@ -27,53 +27,17 @@ def search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
     - Date format is flexible in separators ("-", "/", "."),
         but MUST follow: day → month → year (DD-MM-YYYY).
 
-    Returns:
-    - A Python dictionary with the following fixed structure:
-        {
-            "status": "success",
-            "data": [
-                {
-                    "id": int,
-                    "name": str,
-                    "rating": float,
-                    "price": float,
-                    "currency": str,
-                    "images": list[str],   # always 2 image URLs
-                    "stars": int,
-                    "booking_info": {
-                        "checkin_from": str,
-                        "checkin_until": str,
-                        "checkout_from": str,
-                        "checkout_until": str
-                    }
-                }
-            ]
-        }
+    You must follow this format when return the response:
 
-    Example:
-        {
-            "status": "success",
-            "data": [
-                {
-                    "id": 16134399,
-                    "name": "LA Cairo Plaza Hotel",
-                    "rating": 10.0,
-                    "price": 73.72,
-                    "currency": "USD",
-                    "images": [
-                        "https://cf.bstatic.com/image1.jpg",
-                        "https://cf.bstatic.com/image2.jpg"
-                    ],
-                    "stars": 5,
-                    "booking_info": {
-                        "checkin_from": "10:00",
-                        "checkin_until": "12:00",
-                        "checkout_from": "11:00",
-                        "checkout_until": "13:00"
-                    }
-                }
-            ]
-        }
+    Here are the available hotels in Cairo from 24/04/2026 to 05/05/2026:
+
+    | # | Hotel Name | Rating | Price | Stars | Check-in | Check-out | Images |
+    |---|------------|--------|-------|-------|----------|-----------|--------|
+    | 1 | LA Cairo Plaza Hotel | 10.0 | 73.72 USD | ⭐⭐⭐⭐⭐ | 10:00 → 12:00 | 11:00 → 13:00 | [Img1](https://cf.bstatic.com/image1.jpg), [Img2](https://cf.bstatic.com/image2.jpg) |
+    | 2 | Nile View Hotel | 8.5 | 55.00 USD | ⭐⭐⭐⭐ | 14:00 → 23:00 | 06:00 → 12:00 | [Img1](https://cf.bstatic.com/image3.jpg), [Img2](https://cf.bstatic.com/image4.jpg) |
+
+    Would you like to book any of these hotels? Just let me know which one!
+
     """
     try:
         info_of_hotels = func_search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms)
