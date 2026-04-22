@@ -16,8 +16,8 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.password_validation import validate_password
+from Users.utils import send_reset_email
 
-# Create your views here.
 @api_view(['POST'])
 def signup(request):
     serializer = SignupSerializer(data=request.data)
@@ -173,7 +173,6 @@ def delete_user(request):
     user.delete()
     return Response({'message': 'User account deleted successfully'})
 
-
 @api_view(['POST'])
 def forgot_password(request):
     email = request.data.get('email')
@@ -188,12 +187,7 @@ def forgot_password(request):
 
     reset_link = f"https://romee-lake.vercel.app/reset-password/{uid}/{token}/"
 
-    send_mail(
-        subject="Reset Your Password",
-        message=f"Click here to reset your password:\n{reset_link}",
-        from_email="romee.agent@gmail.com",
-        recipient_list=[email],
-    )
+    send_reset_email(email, reset_link)
 
     return Response({"message": "If this email exists, a reset link was sent."})
 
