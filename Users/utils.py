@@ -15,4 +15,6 @@ def send_reset_email(to_email, reset_link):
             "textContent": f"Click here to reset your password:\n{reset_link}"
         }
     )
+    print("Brevo status:", response.status_code)
+    print("Brevo response:", response.json())
     return response
