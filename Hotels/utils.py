@@ -1,6 +1,7 @@
 from chat.api_keys import XRapidAPIKey_hotels
 import requests
 import json
+from Hotels.state_store import get_store
 
 HEADERS = {
     "x-rapidapi-key": XRapidAPIKey_hotels,
@@ -38,6 +39,10 @@ def get_dest_id(query: str):
 def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms):
     url = "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels"
     dest = get_dest_id(country)
+
+    if not dest:
+        return []
+
     dest_id = dest["dest_id"]
     dest_type = dest["dest_type"]
     params = {
@@ -55,7 +60,8 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
     data = response.json()
     hotels = data.get("data", {}).get("hotels", [])
     result = []
-    for h in hotels[:5]:
+    store=get_store()
+    for i,h in enumerate(hotels[:5],1):
         p = h.get("property", {})
         images = p.get("photoUrls", [])
         if len(images) >= 2:
@@ -65,23 +71,25 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
         else:
             selected_images = ["https://via.placeholder.com/300", "https://via.placeholder.com/300"]
         hotel = {
-            "id": h.get("hotel_id"),
+            "id": i,
+            "real_id": h.get("hotel_id"),
             "name": p.get("name"),
             "rating": p.get("reviewScore"),
             "price": p.get("priceBreakdown", {}).get("grossPrice", {}).get("value"),
             "currency": p.get("priceBreakdown", {}).get("grossPrice", {}).get("currency"),
             "images": selected_images,
             "stars": p.get("propertyClass"),
-            "booking_info": {
-                "checkin_from": p.get("checkin", {}).get("fromTime"),
-                "checkin_until": p.get("checkin", {}).get("untilTime"),
-                "checkout_from": p.get("checkout", {}).get("fromTime"),
-                "checkout_until": p.get("checkout", {}).get("untilTime"),
-            }
+            "booking_info": {"checkin_from": p.get("checkin", {}).get("fromTime"),
+                            "checkin_until": p.get("checkin", {}).get("untilTime"),
+                            "checkout_from": p.get("checkout", {}).get("fromTime"),
+                            "checkout_until": p.get("checkout", {}).get("untilTime"),}
         }
         result.append(hotel)
+
+    store["last_offers"] = {h["id"]: h for h in result}
+    print(f"state_store:{store['last_offers']}")
 
     return json.dumps({"hotels": result}, ensure_ascii=False)
 
 
-#print(func_search_hotels("cairo","2026-05-01","2026-05-05",2,1))
+print(func_search_hotels("cairo","2026-05-01","2026-05-05",2,1))

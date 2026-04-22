@@ -197,7 +197,6 @@ def forgot_password(request):
 
     return Response({"message": "If this email exists, a reset link was sent."})
 
-
 @api_view(['POST'])
 def reset_password(request):
     uid = request.data.get("uid")
