@@ -187,12 +187,7 @@ def forgot_password(request):
 
     reset_link = f"https://romee-lake.vercel.app/reset-password/{uid}/{token}/"
 
-    send_mail(
-        subject="Reset Your Password",
-        message=f"Click here to reset your password:\n{reset_link}",
-        from_email="romee.agent@gmail.com",
-        recipient_list=[email],
-    )
+    send_reset_email(email,reset_link)
 
     return Response({"message": "If this email exists, a reset link was sent."})
 

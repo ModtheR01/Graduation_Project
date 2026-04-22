@@ -1,20 +1,21 @@
 import requests
 import os
+from chat.api_keys import SENDGRID_API_KEY
 
 def send_reset_email(to_email, reset_link):
     response = requests.post(
-        "https://api.brevo.com/v3/smtp/email",
+        "https://api.sendgrid.com/v3/mail/send",
         headers={
-            "api-key": os.getenv("BREVO_API_KEY"),
+            "Authorization": f"Bearer {SENDGRID_API_KEY}",
             "Content-Type": "application/json"
         },
         json={
-            "sender": {"name": "Romee", "email": "romee.agent@gmail.com"},
-            "to": [{"email": to_email}],
+            "personalizations": [{"to": [{"email": to_email}]}],
+            "from": {"email": "romee.agent@gmail.com", "name": "Romee"},
             "subject": "Reset Your Password",
-            "textContent": f"Click here to reset your password:\n{reset_link}"
+            "content": [{"type": "text/plain", "value": f"Click here to reset your password:\n{reset_link}"}]
         }
     )
-    print("Brevo status:", response.status_code)
-    print("Brevo response:", response.json())
+    print("SendGrid status:", response.status_code)
+    print("SendGrid response:", response.text)
     return response
