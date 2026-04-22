@@ -2113,3 +2113,63 @@ const response = await fetch('http://localhost:8000/Users/user-info/', {
 | "Email not verified" | Ask user to verify email in Google account |
 
 # ...existing code...
+
+## Hotel Search API
+
+### Endpoint
+**Function:** `search_hotels`
+
+### Description
+Searches for available hotels in a given city/country within a specified date range with support for multiple rooms and guests.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description | Format/Example |
+|-----------|------|----------|-------------|---|
+| `country` | string | Yes | Name of the city or country | "Cairo", "Paris" |
+| `arr_date` | string | Yes | Check-in date | YYYY-MM-DD (e.g., "2026-04-24") |
+| `dep_date` | string | Yes | Check-out date | YYYY-MM-DD (e.g., "2026-05-05") |
+| `num_of_adults` | integer | Yes | Number of adults | Positive integer |
+| `num_of_rooms` | integer | Yes | Number of rooms needed | Positive integer |
+
+### Response Format
+
+**Success Response:**
+#	Hotel Name	Rating	Price	Stars	Check-in	Check-out	Images
+1	[Hotel Name]	[Rating]	[Price USD]	[Stars]	[Time Range]	[Time Range]	Img1, Img2
+2	[Hotel Name]	[Rating]	[Price USD]	[Stars]	[Time Range]	[Time Range]	Img1, Img2
+Would you like to book any of these hotels? Just let me
+
+**Error Responses:**
+- `"no hotels found"` - No hotels available for the specified criteria
+- `"message: {error details}"` - An error occurred while processing the request
+
+### Response Details
+
+- **Rating**: Numerical rating (0-10 scale)
+- **Price**: Price per room per night in USD
+- **Stars**: Visual star rating (⭐-⭐⭐⭐⭐⭐)
+- **Images**: Always contains exactly 2 image URLs for each hotel
+- **Check-in/Check-out Times**: Available time windows (24-hour format)
+
+### Example Request
+search_hotels(
+country="Cairo",
+arr_date="2026-04-24",
+dep_date="2026-05-05",
+num_of_adults=2,
+num_of_rooms=1
+)
+
+Here are the available hotels in Cairo from 24/04/2026 to 05/05/2026:
+
+#	Hotel Name	Rating	Price	Stars	Check-in	Check-out	Images
+1	LA Cairo Plaza Hotel	10.0	73.72 USD	⭐⭐⭐⭐⭐	10:00 → 12:00	11:00 → 13:00	Img1, Img2
+2	Nile View Hotel	8.5	55.00 USD	⭐⭐⭐⭐	14:00 → 23:00	06:00 → 12:00	Img1, Img2
+Would you like to book any of these hotels? Just let me know which one!
+
+### Notes
+- Date format is flexible with separators ("-", "/", ".") but must follow: day → month → year
+- Always send dates in YYYY-MM-DD format for consistency
+- Each hotel result includes exactly 2 images
+- Results include check-in/check-out time windows for booking flexibility
