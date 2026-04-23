@@ -217,9 +217,10 @@ def get_ticket(request):
 
     flight = task.offer_data
     booking = task.booking_data
+    traveling = Traveling.objects.filter(task_id=int(task_id)).first()
 
-    traveling = Traveling.objects.filter(task_id=task_id).first()
     if not traveling:
+        print("Ticket not ready yet")
         return JsonResponse({"error": "Ticket not ready yet"}, status=404)
 
     return JsonResponse({
