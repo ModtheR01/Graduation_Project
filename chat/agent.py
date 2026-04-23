@@ -32,5 +32,10 @@ def message_agent(chat_messages):
     for msg in chat_messages:
         messages["messages"].append((msg["role"], msg["content"]))
 
-    response = agent.invoke(messages)["messages"][-1].content
-    return response if response else "Sorry, I am a bit confused. Can you rephrase?"
+    response = agent.invoke(
+        messages,
+        config={
+            "recursion_limit": 5   # يسمح بـ multiple tool calls
+        })
+    
+    return response["messages"][-1].content if response else "Sorry, I am a bit confused. Can you rephrase?"

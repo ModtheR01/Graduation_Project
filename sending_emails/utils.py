@@ -11,6 +11,7 @@ from googleapiclient.discovery import build
 from django.shortcuts import redirect
 from Users.models import User
 from .models import Contacts , Tokens
+from Tasks.models import Tasks
 import os
 from dotenv import load_dotenv
 import jwt
@@ -114,17 +115,24 @@ def exchange_code_for_tokens(code: str):
 
 def save_tokens(user_id, token_data):
     user = User.objects.get(pk=user_id)
-
-
     access_token = token_data.get("access_token")
     refresh_token = token_data.get("refresh_token")
     expiry_datetime = token_data.get("expires_at")
+    print("trying to get email from google using access token")
+    resp = requests.get(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    email = resp.json().get("email") 
+    print("we got the mail and its :",email)
+
     if not refresh_token or not expiry_datetime:
         raise ValueError("No refresh token or expiry time returned from Google")
     if Tokens.objects.filter(user=user).exists():
         return redirect("https://romee-lake.vercel.app/")
     token_obj = Tokens(
         user_id=user,
+        email=email,
         access_token=access_token,
         refresh_token=refresh_token,
         expiry= datetime.fromtimestamp(expiry_datetime, tz=timezone.utc)
@@ -187,3 +195,7 @@ def get_gmail_service(user_id):
 
     service = build("gmail", "v1", credentials=creds)
     return service
+
+def save_mail():
+    #save sent mail data in db
+    return 1
