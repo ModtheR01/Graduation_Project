@@ -75,6 +75,7 @@ def send_message(request):
         "content": response
     })
     Chats.objects.filter(id=chat.id).update(message=chat.message)
+    print(f"Payment Data:{payment_data}")
     return Response({
         "response": response,
         # "title": chat.title,
