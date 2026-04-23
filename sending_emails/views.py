@@ -109,7 +109,7 @@ def is_connected(request):
     user = request.user
 
     token = Tokens.objects.filter(user=user).first()
-
+    
     if not token:
         return Response({
             "is_connected": False
@@ -117,4 +117,5 @@ def is_connected(request):
 
     return Response({
         "is_connected": True,
+        "email": token.email
     })
