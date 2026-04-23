@@ -90,6 +90,7 @@ def calculate_arrival(departure_time: str, duration_hours: float):
     return arr.strftime("%H:%M")
 
 def generate_mock_flights(origin: str, destination: str, date: str):
+    print("Mock Flights")
     distance = calculate_distance(origin, destination)
     if not distance:
         return []
@@ -126,8 +127,7 @@ def generate_mock_flights(origin: str, destination: str, date: str):
             "route": f"{origin} → {destination}",
             "date": date,
             "airline": airline,
-            "departure_time": dep_time,
-            "arrival_time": calculate_arrival(dep_time, actual_duration),
+            "time": f"{dep_time} → {calculate_arrival(dep_time, actual_duration)}",  # ✅ نفس الـ real
             "duration": f"{hours}h {minutes}m",
             "price": f"${int(base_price * price_variation)}",
             "stops": stops,
@@ -136,4 +136,4 @@ def generate_mock_flights(origin: str, destination: str, date: str):
 
     return flights
 
-print(generate_mock_flights("Cairo","Dubai","25/4/2026"))
+#print(generate_mock_flights("Cairo","Dubai","25/4/2026"))
