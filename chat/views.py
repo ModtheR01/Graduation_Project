@@ -84,7 +84,7 @@ def send_message(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_chats(request):
-    chats = Chats.objects.filter(user_email=request.user).order_by('-created_at').values('id', 'title') #.order_by('-created_at') ->
+    chats = Chats.objects.filter(user_email=request.user).order_by('created_at').values('id', 'title') #.order_by('-created_at') -> Descending
     if not chats:
         return Response({"error": "No chats found"}, status=404)
     return Response(chats)
