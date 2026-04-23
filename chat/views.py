@@ -49,23 +49,20 @@ def send_message(request):
             Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
         response = message_agent(chat.message)
         print("Agent response:", response)
-        if "Your booking is ready! The Payment will appear here, Please complete the payment." in response:
-            task_id = store.get("pending_payment_task_id")
-            if not task_id:
+        task_id = store.get("pending_payment_task_id")
+        if task_id:
+            try:
+                task = Tasks.objects.get(id=task_id)
+                payment_data = {
+                    "required": True,
+                    "task_id": task_id,
+                    "client_secret": task.booking_data.get("client_secret")
+                }
+                response = "Your booking is ready! Please complete the payment."
+            except Tasks.DoesNotExist:
                 response = "Something went wrong. Please try again."
-            else:
-                try:
-                    task = Tasks.objects.get(id=task_id)
-                    payment_data = {
-                        "required": True,
-                        "task_id": task_id,
-                        "client_secret": task.booking_data.get("client_secret")
-                    }
-                    response = "Your booking is ready! Please complete the payment."
-                except Tasks.DoesNotExist:
-                    response = "Something went wrong. Please try again."
-                finally:
-                    store.pop("pending_payment_task_id", None)
+            finally:
+                store.pop("pending_payment_task_id", None)
     except Exception as e:
         print(f"Agent error: {e}")
         return Response({"error": "Agent failed, try again"}, status=500)
