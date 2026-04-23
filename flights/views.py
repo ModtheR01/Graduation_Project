@@ -244,9 +244,10 @@ def get_ticket(request):
             "status": booking.get("status"),
         }
     }
-    chat_id = task.booking_data.get("chat_id")
+    chat_id = task.chat_id
     chat = Chats.objects.filter(id=chat_id).first()
     if chat:
+        print("chat exist")
         messages = chat.message or []
         messages.append({
             "role": "assistant",
