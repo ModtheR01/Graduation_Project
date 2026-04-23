@@ -39,8 +39,22 @@ def search_flights(origin: str, destination: str, date: str):
         - Even if the user speaks Arabic, DO NOT translate airline names, times, prices, or formatting.
         - If the tool output starts with [FINAL_ANSWER], you MUST return everything after it EXACTLY as-is.
         - The language rule applies ONLY to normal conversation text, NOT to structured flight results.
-        you must follow this format (Regardless of the language, create this format, but keep the information in the language you're using with the user.):
+        you must follow this format in english
             "Here are the available flights from Cairo to Casablanca on 24/4/2026:\n\n| # | Route | Date | Time | Duration | Price | Airline | Direct |\n|---|-------|------|------|----------|-------|---------|--------|\n| 1 | Cairo → Casablanca | 2026-04-24 | 09:00 → 12:30 | 5h 30m | $465 | EgyptAir | ✅ Yes |\n| 2 | Cairo → Casablanca | 2026-04-24 | 16:20 → 00:20 | 10h 0m | $326 | Lufthansa | ❌ 1 stop |\n| 3 | Cairo → Casablanca | 2026-04-24 | 09:40 → 13:30 | 5h 50m | $453 | Royal Air Maroc | ✅ Yes |\n Would you like to book any of these flights? Just let me know which one!"
+        you must follow this format in arabic
+            "            إليك الرحلات المتاحة بناءً على طلبك:
+
+            | # | المسار | التاريخ | الوقت | المدة | السعر | شركة الطيران | التوقفات |
+            |---|-------|---------|-------|-------|-------|-------------|--------|
+            | 1 | القاهرة → باريس | 2026-05-05 | 04:45 → 13:45 | 10h 0m | $419 | Lufthansa | توقفان |
+            | 2 | القاهرة → باريس | 2026-05-05 | 03:10 → 09:50 | 7h 40m | $344 | LOT | توقف واحد |
+            | 3 | القاهرة → باريس | 2026-05-05 | 17:35 → 20:00 | 27h 25m | $442 | Emirates | مباشر |
+
+            - 🏆 **الأسرع (Fastest):** Emirates
+            - 💰 **الأرخص (Cheapest):** LOT 
+            - ✨ **الأفضل (Best):** Lufthansa
+
+            هل تود حجز أي من هذه الرحلات؟"
     """
     print("🔥 search_flights CALLED")
     origin_ids = get_place_id(origin)
