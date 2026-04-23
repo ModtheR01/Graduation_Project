@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view , permission_classes
 from rest_framework.permissions import IsAuthenticated 
 from rest_framework.response import Response
 import jwt
-from .utils import build_auth_url , exchange_code_for_tokens , save_tokens
+from .utils import build_auth_url , exchange_code_for_tokens , save_tokens ,revoke_token
 from .models import Contacts ,Tokens
 from .serializers import contact_serializer
 from rest_framework.exceptions import PermissionDenied
@@ -117,4 +117,32 @@ def is_connected(request):
 
     return Response({
         "is_connected": True,
+        "email": token.email
     })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def disconnect(request):
+    user = request.user
+
+    token = Tokens.objects.filter(user=user).first()
+    
+    if not token:
+        return Response({"message": "Already disconnected"}, status=200)
+    
+    try:
+        # 🔥 revoke refresh token
+        if token.refresh_token:
+            revoke_token(token.refresh_token)
+            print("token revoked from google api")
+
+
+    except Exception as e:
+        print("Revoke error:", str(e))
+
+    # 🧹 delete from DB
+    token.delete()
+    print("token deleted from db")
+
+    return Response({"message": "Disconnected successfully"})
+

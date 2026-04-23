@@ -45,6 +45,7 @@ cipher = Fernet(FERNET_KEY.encode())
 class Tokens(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+    email = models.EmailField(null=True, blank=True)
     access_token = models.TextField(blank=True, null=True)
     refresh_token = models.TextField(blank=True, null=True)
 

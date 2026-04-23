@@ -4,8 +4,7 @@ from Tasks.models import Tasks
 # Create your models here.
 class ToDoList(models.Model):
     list_name = models.CharField(primary_key=True, max_length=50)
-    task = models.OneToOneField(Tasks, models.DO_NOTHING)
-    status = models.CharField(max_length=15, blank=True, null=True)
+    task = models.OneToOneField(Tasks, models.DO_NOTHING , null=True, blank=True)
     finished = models.BooleanField(blank=True, null=True)
 
     class Meta:
