@@ -9,5 +9,7 @@ urlpatterns=[
     path("google-auth-url/",views.get_google_auth_url),  # hassan call this to get google api to call
     path("oauth2callback/",views.google_callback),
     path("is-connected/",views.is_connected),
+    path("disconnect/",views.disconnect),
+
 
 ]
