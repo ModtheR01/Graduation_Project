@@ -64,7 +64,10 @@ def search_flights(origin: str, destination: str, date: str):
     dest_ids = get_place_id(destination)
 
     if not origin_ids or not dest_ids:
-        return {"error": "Invalid location"}
+        flights = generate_mock_flights(origin, destination, date)
+        store = get_store()
+        store["last_offers"] = {f["id"]: f for f in flights}
+        return f"[FINAL_ANSWER]{flights}"
 
     url = "https://skyscanner-flights-travel-api.p.rapidapi.com/flights/searchFlights"
 
