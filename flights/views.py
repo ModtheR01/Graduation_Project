@@ -11,6 +11,7 @@ from .utilities import get_place_id
 from payment.utils import create_payment_intent
 from Tasks.models import Tasks
 from flights.models import Traveling
+from chat.models import Chats
 
 print("in views")
 HEADERS = {
@@ -222,6 +223,37 @@ def get_ticket(request):
     if not traveling:
         print("Ticket not ready yet")
         return JsonResponse({"error": "Ticket not ready yet"}, status=404)
+
+    message={
+        "ticket": {
+            "passenger": {
+                "fname": booking["user"].get("fname"),
+                "lname": booking["user"].get("lname"),
+                "gender": booking["user"].get("gender"),
+                "passport": booking["user"].get("passport"),
+                "nationality": booking["user"].get("nationality"),
+            },
+            "flight": {
+                "ticket_number": traveling.ticket_num,
+                "airline": flight.get("airline"),
+                "route": flight.get("route"),
+                "date": flight.get("date"),
+                "time": flight.get("time"),
+                "price": flight.get("price"),
+            },
+            "status": booking.get("status"),
+        }
+    }
+    chat_id = task.booking_data.get("chat_id")
+    chat = Chats.objects.filter(id=chat_id).first()
+    if chat:
+        messages = chat.message or []
+        messages.append({
+            "role": "assistant",
+            "content": message
+        })
+        chat.message = messages
+        chat.save()
 
     return JsonResponse({
         "ticket": {
