@@ -55,8 +55,8 @@ GOOGLE_CLIENT_SECRET= os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI= os.getenv("GOOGLE_REDIRECT_URI")
 OAUTH_AUTH_URL= os.getenv("OAUTH_AUTH_URL")
 OAUTH_TOKEN_URL= os.getenv("OAUTH_TOKEN_URL")
-# this scope tells gmail that we will only use user token to send emails
-SCOPE = "https://www.googleapis.com/auth/gmail.send"
+# this scope tells gmail that we will only use user token to send emails and access user data(email)
+SCOPE = "openid email https://www.googleapis.com/auth/gmail.send"
 
 
 
@@ -195,6 +195,13 @@ def get_gmail_service(user_id):
 
     service = build("gmail", "v1", credentials=creds)
     return service
+
+def revoke_token(token):
+    requests.post(
+        "https://oauth2.googleapis.com/revoke",
+        params={"token": token},
+        headers={"content-type": "application/x-www-form-urlencoded"},
+    )
 
 def save_mail():
     #save sent mail data in db
