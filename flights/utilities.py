@@ -13,45 +13,52 @@ HEADERS = {
     "x-rapidapi-host": "skyscanner-flights-travel-api.p.rapidapi.com"
 }
 
+
 def get_place_id(query: str):
     print("in get place id")
-    print("XRapidAPIKey:", XRapidAPIKey)
     url = "https://skyscanner-flights-travel-api.p.rapidapi.com/flights/searchAirport"
-
     params = {
         "query": query,
         "market": "US",
         "locale": "en-US"
     }
     print("calling flights API...")
-    response = requests.get(url, headers=HEADERS, params=params)
-    print("status code:", response.status_code)
-    print("response:", response.text[:500])
-    data = response.json()
+    try:
+        response = requests.get(url, headers=HEADERS, params=params)
+        print("status code:", response.status_code)
+        
+        # ✅ لو الـ API مش شغالة
+        if response.status_code in [403, 429, 401]:
+            print(f"API blocked: {response.status_code}")
+            return None
 
-    places = data.get("places", [])
+        data = response.json()
+        places = data.get("places", [])
+        if not places:
+            return None
 
-    if not places:
+        exact = next(
+            (p for p in places if p["name"].lower() == query.lower()),
+            None
+        )
+        if exact:
+            best = exact
+        else:
+            city = next((p for p in places if p["placeType"] == "CITY"), None)
+            airport = next((p for p in places if p["placeType"] == "AIRPORT"), None)
+            best = city if city else airport
+
+        if not best:
+            return None
+
+        print(f"get_place_id('{query}') -> {best['name']} ({best['skyId']})")
+        return {
+            "skyId": best["skyId"],
+            "entityId": best["entityId"]
+        }
+    except Exception as e:
+        print(f"get_place_id error: {e}")
         return None
-
-    # 🎯 exact match الأول
-    exact = next(
-        (p for p in places if p["name"].lower() == query.lower()),
-        None
-    )
-
-    if exact:
-        best = exact
-    else:
-        # fallback
-        city = next((p for p in places if p["placeType"] == "CITY"), None)
-        airport = next((p for p in places if p["placeType"] == "AIRPORT"), None)
-        best = city if city else airport
-    print(f"get_place_id('{query}') -> {best['name']} ({best['skyId']})")
-    return {
-        "skyId": best["skyId"],
-        "entityId": best["entityId"]
-    }
 
 def generate_ticket_number():
     year = datetime.now().year
@@ -90,6 +97,7 @@ def calculate_arrival(departure_time: str, duration_hours: float):
     return arr.strftime("%H:%M")
 
 def generate_mock_flights(origin: str, destination: str, date: str):
+    print("Mock Flights")
     distance = calculate_distance(origin, destination)
     if not distance:
         return []
@@ -126,8 +134,7 @@ def generate_mock_flights(origin: str, destination: str, date: str):
             "route": f"{origin} → {destination}",
             "date": date,
             "airline": airline,
-            "departure_time": dep_time,
-            "arrival_time": calculate_arrival(dep_time, actual_duration),
+            "time": f"{dep_time} → {calculate_arrival(dep_time, actual_duration)}",  # ✅ نفس الـ real
             "duration": f"{hours}h {minutes}m",
             "price": f"${int(base_price * price_variation)}",
             "stops": stops,
@@ -136,4 +143,4 @@ def generate_mock_flights(origin: str, destination: str, date: str):
 
     return flights
 
-print(generate_mock_flights("Cairo","Dubai","25/4/2026"))
+#print(generate_mock_flights("Cairo","Dubai","25/4/2026"))
