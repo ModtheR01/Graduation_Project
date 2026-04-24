@@ -52,7 +52,7 @@ def get_all_todo_lists():
     user = store.get("user_id") # id == email so mf34 fr2 
     todo_lists = ToDoList.objects.filter(user = user)
 
-    serialized_todo_lists = todoList_serializer(todo_lists)
+    serialized_todo_lists = todoList_serializer(todo_lists, many=True)
 
     return serialized_todo_lists.data
 
