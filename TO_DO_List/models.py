@@ -16,7 +16,7 @@ class ToDoList(models.Model):
 
 
 class ToDoItems(models.Model):
-    list_name = models.ForeignKey('ToDoList', models.DO_NOTHING, db_column='list_name')
+    list_name = models.ForeignKey('ToDoList', models.CASCADE, db_column='list_name')
     item_name = models.CharField(max_length=30)
     finished = models.BooleanField(blank=True, null=True, default=False)
 
