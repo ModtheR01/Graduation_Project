@@ -56,4 +56,25 @@ def get_all_todo_lists():
 
     return serialized_todo_lists.data
 
+@tool 
+def get_items_inList(todo_list_name: str):
+    """
+    use this tool to get all tasks inside a single list you should provide the name correctly as its stored in the db 
+    """
+    store = get_store()
+    user = store.get("user_id")
+
+    if not todo_list_name:
+        return "please provide a todo list name"
+
+    try:
+        todo_list = ToDoList.objects.get(user=user, list_name=todo_list_name)
+    except ToDoList.DoesNotExist:
+        return "list not found"
+
+    todos = ToDoItems.objects.filter(list_name=todo_list)
+
+    serialized_todos = todoList_items_serializer(todos, many=True)
+
+    return serialized_todos.data
 
