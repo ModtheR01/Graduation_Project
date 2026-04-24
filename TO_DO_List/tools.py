@@ -135,6 +135,17 @@ def get_items_inList(todo_list_name: str):
 
 @tool 
 def manage_todo(operation: int, todo_list_name: str, item_name: str):
+    """
+    you can use this tool to manage a todo in a specified `todo_list_name`
+    you can add new , delete , update status of a todo item in using this tool
+    parameters:
+    todo_list_name --> the name of the list the user want to add the todo in it 
+    item_name --> the name of the todo items (ex. study chapter 1)
+    operation --> this is a value you send depending on what operation you want to do (add,delete ,update):
+    -  `1` for adding a new todo item
+    -  `2` for deleting an already existing todo item
+    -  `3` for updating an already existing todo item
+    """
     store = get_store()
     user = store.get("user_id")
 
