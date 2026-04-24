@@ -202,7 +202,3 @@ def revoke_token(token):
         params={"token": token},
         headers={"content-type": "application/x-www-form-urlencoded"},
     )
-
-def save_mail():
-    #save sent mail data in db
-    return 1

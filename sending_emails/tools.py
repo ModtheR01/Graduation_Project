@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 import base64
 from langchain_core.tools import tool
 from sending_emails.utils import get_all_contacts ,add_contact
-from .utils import is_email_valid
+from .utils import is_email_valid 
 
 @tool
 def search_in_contact(request):
