@@ -49,8 +49,8 @@ def get_all_todo_lists():
     so whenever the user asks for his tasks or his todos in general or his lists you will be calling this tool
     """
     store = get_store()
-    user_email = store.get("user_id") # id == email so mf34 fr2 
-    todo_lists = ToDoList.objects.filter(user_email = user_email)
+    user = store.get("user_id") # id == email so mf34 fr2 
+    todo_lists = ToDoList.objects.filter(user = user)
 
     serialized_todo_lists = todoList_serializer(todo_lists)
 
