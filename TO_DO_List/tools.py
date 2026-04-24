@@ -59,7 +59,8 @@ def get_all_todo_lists():
 @tool 
 def get_items_inList(todo_list_name: str):
     """
-    use this tool to get all tasks inside a single list you should provide the name correctly as its stored in the db 
+    use this tool to get all tasks inside a single list you should provide the name correctly as its stored in the database
+    it return list of todo items in a specified list
     """
     store = get_store()
     user = store.get("user_id")
@@ -78,3 +79,114 @@ def get_items_inList(todo_list_name: str):
 
     return serialized_todos.data
 
+# @tool 
+# def manage_todo(operation:int, todo_list_name:str , item_name:str):
+#     """
+#     you can use this tool to manage a todo in a specified `todo_list_name`
+#     you can add new , delete , update status of a todo item in using this tool
+#     parameters:
+#     todo_list_name --> the name of the list the user want to add the todo in it 
+#     item_name --> the name of the todo items (ex. study chapter 1)
+#     operation --> this is a value you send depending on what operation you want to do (add,delete ,update):
+#     -  `1` for adding a new todo item
+#     -  `2` for deleting an already existing todo item
+#     -  `3` for updating an already existing todo item
+#     """
+#     store = get_store()
+#     user = store.get("user_id")
+
+#     try:
+#         todo_list = ToDoList.objects.get(user=user, list_name=todo_list_name)
+#         todos = ToDoItems.objects.filter(list_name=todo_list)
+#         todo = todos.get(item_name = item_name)
+#     except ToDoList.DoesNotExist:
+#         return "list not found"
+
+
+#     if operation == 1:
+#         print("will be adding in list :", todo_list_name)
+#         if not todo:
+#             todo = ToDoItems(
+#                 list_name = todo_list,
+#                 item_name = item_name,
+#                 finished = False
+#             )
+#             todo.save()
+#             print("new todo saved successfully :" , todo)
+#         else:
+#             print("already existing")
+#             return "todo alraady existing"
+#         return todo
+    
+#     if operation == 2:
+#         if not todo:
+#             print("no such todo")
+#             return "no such todo"
+#         todo.delete()
+
+#     if operation == 3:
+#         todo.finished = True
+    
+#     else:
+#         print("sent wrong operation number:",operation)
+#         return "please send a valid operation number"
+
+
+
+@tool 
+def manage_todo(operation: int, todo_list_name: str, item_name: str):
+    store = get_store()
+    user = store.get("user_id")
+
+    try:
+        todo_list = ToDoList.objects.get(user=user, list_name=todo_list_name)
+    except ToDoList.DoesNotExist:
+        return "list not found"
+
+    todo_qs = ToDoItems.objects.filter(list_name=todo_list, item_name=item_name)
+
+    # 🔹 ADD
+    if operation == 1:
+        if todo_qs.exists():
+            return "todo already exists"
+
+        todo = ToDoItems.objects.create(
+            list_name=todo_list,
+            item_name=item_name,
+            finished=False
+        )
+
+        return {
+            "status": "created",
+            "item": item_name
+        }
+
+    # 🔹 DELETE
+    elif operation == 2:
+        if not todo_qs.exists():
+            return "no such todo"
+
+        todo_qs.delete()
+        return {
+            "status": "deleted",
+            "item": item_name
+        }
+
+    # 🔹 UPDATE
+    elif operation == 3:
+        if not todo_qs.exists():
+            return "no such todo"
+
+        todo = todo_qs.first()
+        todo.finished = True
+        todo.save()
+
+        return {
+            "status": "updated",
+            "item": item_name,
+            "finished": True
+        }
+
+    # 🔹 INVALID OPERATION
+    else:
+        return "please send a valid operation number"
