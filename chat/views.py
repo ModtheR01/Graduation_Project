@@ -41,7 +41,6 @@ def send_message(request):
         })
         chat.message = messages
 
-    store= get_store()
     store["chat_id"] = chat.id
     store_h=get_store_hotels()
     store_h["chat_id"] = chat.id
