@@ -51,7 +51,7 @@ def send_message(request):
             Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
         response = message_agent(chat.message)
         print("Agent response:", response)
-        task_id = store.get("pending_payment_task_id")
+        task_id = store.get("pending_payment_task_id") or store_h.get("pending_payment_task_id")
         print("pending_payment_task_id:", task_id)  # ← وده
         print("Store content:", store)  # ← أضف ده
         print("Flights Store:", get_store())        # ← أضف ده
