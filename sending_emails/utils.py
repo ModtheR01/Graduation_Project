@@ -20,9 +20,9 @@ load_dotenv()
 
 # contacts related functions
 
-def get_all_contacts(request):
+def get_all_contacts(user):
     try:
-        contacts = Contacts.objects.filter(user_email=request.user)
+        contacts = Contacts.objects.filter(user_email=user)
         absstracted_contacts = [] # we want to return only the email and the name not the whole object with all its attributes to not confuse the stupid model 
         for contact in contacts:
             absstracted_contacts.append({   
@@ -32,9 +32,9 @@ def get_all_contacts(request):
     except Contacts.DoesNotExist:
         return "this user has no contacts yet, please ask him to add some contacts first " 
 
-def add_contact(request,email,name):
+def add_contact(user,email,name):
     try:
-        new_contact = Contacts.objects.create(user_email=request.user,receiver_email=email,nickname=name)
+        new_contact = Contacts.objects.create(user_email=user,receiver_email=email,nickname=name)
         new_contact.save()
         return {"receiver_email": new_contact.receiver_email,"nickname": new_contact.nickname}
     except Exception as e:
@@ -202,7 +202,3 @@ def revoke_token(token):
         params={"token": token},
         headers={"content-type": "application/x-www-form-urlencoded"},
     )
-
-def save_mail():
-    #save sent mail data in db
-    return 1

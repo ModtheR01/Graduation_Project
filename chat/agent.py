@@ -7,7 +7,8 @@ from flights.views import booking_flight, search_flights
 #from sending_emails.tools import search_in_contact, add_new_contact, send_email
 from flights.views import search_flights
 from sending_emails.tools import search_in_contact, add_new_contact, send_email
-from Hotels.views import search_hotels , booking_hotel
+from Hotels.views import search_hotels
+from TO_DO_List.tools import get_all_todo_lists, get_items_inList ,manage_todo
 #print(create_agent)
 llm = ChatOpenAI(
     model=default_model,
@@ -19,8 +20,8 @@ llm = ChatOpenAI(
         "parallel_tool_calls": False  # ✅ امنع الـ parallel calls
     }
 )
-#  , search_in_contact, add_new_contact, send_email
-tools = [search_flights,booking_flight, send_email,search_hotels,booking_hotel]
+#  all tools added now except for reminder
+tools = [search_flights,booking_flight, send_email,search_hotels,get_all_todo_lists,get_items_inList,manage_todo,search_in_contact, add_new_contact,]
 #tools = [search_flights,send_email] 
 agent = create_agent(llm, tools=tools)
 print("agent created ....")

@@ -28,4 +28,6 @@ urlpatterns = [
     path('hotels/',include('Hotels.urls')),
     path('sending_emails/',include('sending_emails.urls')),
     path('flights/',include('flights.urls')),
+    path('todo/',include('TO_DO_List.urls')),
+
 ]

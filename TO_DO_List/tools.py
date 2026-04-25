@@ -3,94 +3,113 @@ from langchain_core.tools import tool
 from .models import ToDoList
 from .models import ToDoItems
 from flights.state_store import get_store
+from .serializers import todoList_items_serializer , todoList_serializer
+
+
 
 
 @tool
-def get_all_todo_lists(todo_list_name = None):
+def get_all_todo_lists():
     """
-    you can use this tool to return all todo lists available for the user or you can specify a single todo list by providing the name of it as a parameter
-    you can call this tool twice if the user gave you `todo_list_name` just to make sure it matches in the db 
-     1 --> so the first call will be to get all todo lists names from the database and identify which one the user propably want
-     2 --> the second call is to actually get the todos inside it by passing todo_list_name to the function
-
-    if the user provided a todolist name that isnt found in the database nor is simillar to another list name tell him that there is no such a list 
-
-    this funtion return list to todolists or list of todo items depending on which scenario
-
-    use this tool whenever the user ask about thier list
-    (e.g. what tasks should i do today )
-    (e.g. whats on my todo list today )
-    (e.g. what the remaining todos? )
-    (e.g. - show me all tasks / todos )
-    (e.g. what is the remaining tasks in my ""todo list name"" todo list )
-
+    you can use this tool to return all todo lists available for the user
+    so whenever the user asks for his tasks or his todos in general or his lists you will be calling this tool
     """
     store = get_store()
-    user_id = store.get("user_id")
-    todo_lists = ToDoList.objects.filter(us)
-    return todo_list
+    user = store.get("user_id") # id == email so mf34 fr2 
+    todo_lists = ToDoList.objects.filter(user = user)
 
-@tool
-def create_todo(name , status = False): # :
-    # 7war en e7na nrg3 el list kolha da hyt4al lama el database tthat we hyb2a byt3rd fe saf7th bs
-    """
-    this tool is used to add a new todo item to the user todo list 
+    serialized_todo_lists = todoList_serializer(todo_lists, many=True)
 
-    the parameters are :
-    name --> the name or the description of the todo item (e.g. clean my room)
-    status --> a boolean value that indicate if the todo has been done or not by default its false unless the user told you he already done it and just wna to track it 
-
-    it return the full list so you can send it to user to review it
-    use this tool whenever the user want to add a todo item 
-    (e.g. add a task of cleaning my room )
-    (e.g. create a todo of finishing the lesson)
-    """
-    item = {
-        "name":name,
-        "is_done":status
-    }
-    todo_list.append(item)
-    return todo_list
+    return serialized_todo_lists.data
 
 @tool 
-def delete_todo(name):
+def get_items_inList(todo_list_name: str):
     """
-    this tool is used to delete todo item from the user todo list 
-    when you are going to delete a task first call the get all list tool so you can provide the correct specific name the todo item is stored in the dataase with
-
-    parameters:
-    name --> the name or the description of the todo item (e.g. clean my room)
-
-    return the updated list so you can send it to user to review it 
-
-    use this tool whenever the user want to delete a todo item :
-    (e.g. delete the task of cleaning my room )
-    (e.g. delete the todo of finishing the lesson)
-
+    use this tool to get all tasks inside a single list you should provide the name correctly as its stored in the database
+    it return list of todo items in a specified list
     """
-    
-    for todo in todo_list:
-        if todo["name"] == name:
-            todo_list.remove(todo)
-            break
-    return todo_list
+    store = get_store()
+    user = store.get("user_id")
+
+    if not todo_list_name:
+        return "please provide a todo list name"
+
+    try:
+        todo_list = ToDoList.objects.get(user=user, list_name=todo_list_name)
+    except ToDoList.DoesNotExist:
+        return "list not found"
+
+    todos = ToDoItems.objects.filter(list_name=todo_list)
+
+    serialized_todos = todoList_items_serializer(todos, many=True)
+
+    return serialized_todos.data
 
 @tool 
-def set_state_true(name):
+def manage_todo(operation: int, todo_list_name: str, item_name: str):
     """
-    use this tool whenever the user want to set a specific todo item status to done (true)
-
+    you can use this tool to manage a todo in a specified `todo_list_name`
+    you can add new , delete , update status of a todo item in using this tool
     parameters:
-    name --> the name or the description of the todo item (e.g. clean my room)
-
-    return the updated list so you can send it to user to review it 
-
-    use this tool whenever the user want to check a todo item 
-    (e.g. i have done the task of cleaning my room )
-    (e.g. set status of the todo of finishing the lesson to true)
-
+    todo_list_name --> the name of the list the user want to add the todo in it 
+    item_name --> the name of the todo items (ex. study chapter 1)
+    operation --> this is a value you send depending on what operation you want to do (add,delete ,update):
+    -  `1` for adding a new todo item
+    -  `2` for deleting an already existing todo item
+    -  `3` for updating an already existing todo item
     """
-    for todo in todo_list:
-        if todo["name"] == name:
-            todo["is_done"] = True
-    return todo_list
+    store = get_store()
+    user = store.get("user_id")
+
+    try:
+        todo_list = ToDoList.objects.get(user=user, list_name=todo_list_name)
+    except ToDoList.DoesNotExist:
+        return "list not found"
+
+    todo_qs = ToDoItems.objects.filter(list_name=todo_list, item_name=item_name)
+
+    # 🔹 ADD
+    if operation == 1:
+        if todo_qs.exists():
+            return "todo already exists"
+
+        todo = ToDoItems.objects.create(
+            list_name=todo_list,
+            item_name=item_name,
+            finished=False
+        )
+
+        return {
+            "status": "created",
+            "item": item_name
+        }
+
+    # 🔹 DELETE
+    elif operation == 2:
+        if not todo_qs.exists():
+            return "no such todo"
+
+        todo_qs.delete()
+        return {
+            "status": "deleted",
+            "item": item_name
+        }
+
+    # 🔹 UPDATE
+    elif operation == 3:
+        if not todo_qs.exists():
+            return "no such todo"
+
+        todo = todo_qs.first()
+        todo.finished = True
+        todo.save()
+
+        return {
+            "status": "updated",
+            "item": item_name,
+            "finished": True
+        }
+
+    # 🔹 INVALID OPERATION
+    else:
+        return "please send a valid operation number"
