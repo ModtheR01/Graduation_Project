@@ -4,7 +4,7 @@ from Tasks.models import Tasks
 # Create your models here.
 class Hotels(models.Model):
     booking_number = models.CharField(primary_key=True, max_length=30)
-    task = models.OneToOneField(Tasks, models.DO_NOTHING)
+    task = models.OneToOneField(Tasks, models.CASCADE)
     number_of_persons = models.IntegerField(blank=True, null=True)
     number_of_rooms = models.IntegerField(blank=True, null=True)
     hotel_name = models.CharField(max_length=40, blank=True, null=True)

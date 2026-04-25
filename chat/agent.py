@@ -7,7 +7,7 @@ from flights.views import booking_flight, search_flights
 #from sending_emails.tools import search_in_contact, add_new_contact, send_email
 from flights.views import search_flights
 from sending_emails.tools import search_in_contact, add_new_contact, send_email
-from Hotels.views import search_hotels
+from Hotels.views import search_hotels , booking_hotel
 #print(create_agent)
 llm = ChatOpenAI(
     model=default_model,
@@ -20,7 +20,7 @@ llm = ChatOpenAI(
     }
 )
 #  , search_in_contact, add_new_contact, send_email
-tools = [search_flights,booking_flight, send_email,search_hotels]
+tools = [search_flights,booking_flight, send_email,search_hotels,booking_hotel]
 #tools = [search_flights,send_email] 
 agent = create_agent(llm, tools=tools)
 print("agent created ....")

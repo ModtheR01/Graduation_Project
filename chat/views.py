@@ -7,7 +7,8 @@ from chat.agent import message_agent
 from rest_framework.response import Response
 from .utils import generate_title
 from threading import Thread
-from flights.state_store import get_store
+from flights.state_store import get_store as get_store_hotels
+from Hotels.state_store import get_store
 from Tasks.models import Tasks
 
 @api_view(['POST'])
@@ -42,6 +43,8 @@ def send_message(request):
 
     store= get_store()
     store["chat_id"] = chat.id
+    store_h=get_store_hotels()
+    store_h["chat_id"] = chat.id
     payment_data = None
 
     try:
