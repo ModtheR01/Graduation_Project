@@ -86,6 +86,7 @@ def booking_hotel(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,national_id
         client_secret , payment_intent_id = create_payment_intent_hotels(booking,task.id)
         task.booking_data["payment_intent_id"] = payment_intent_id
         task.booking_data["client_secret"] = client_secret 
+        print("✅ Hotel Store after booking:", get_store_hotels())
         task.save()
         store["pending_payment_task_id"] = task.id
         return "[PAYMENT_REQUIRED]"
