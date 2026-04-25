@@ -20,8 +20,8 @@ llm = ChatOpenAI(
         "parallel_tool_calls": False  # ✅ امنع الـ parallel calls
     }
 )
-#  , search_in_contact, add_new_contact, send_email
-tools = [search_flights,booking_flight, send_email,search_hotels,get_all_todo_lists,get_items_inList,manage_todo]
+#  all tools added now except for reminder
+tools = [search_flights,booking_flight, send_email,search_hotels,get_all_todo_lists,get_items_inList,manage_todo,search_in_contact, add_new_contact,]
 #tools = [search_flights,send_email] 
 agent = create_agent(llm, tools=tools)
 print("agent created ....")
