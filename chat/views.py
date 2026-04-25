@@ -52,6 +52,8 @@ def send_message(request):
         response = message_agent(chat.message)
         print("Agent response:", response)
         task_id = store.get("pending_payment_task_id")
+        print("pending_payment_task_id:", task_id)  # ← وده
+        print("Store content:", store)  # ← أضف ده
         if task_id:
             try:
                 task = Tasks.objects.get(id=task_id)
