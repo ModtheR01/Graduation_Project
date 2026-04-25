@@ -4,5 +4,5 @@ _store={
     "chat_id":None,
 }
 
-def get_store():
+def get_store_hotels():
     return _store

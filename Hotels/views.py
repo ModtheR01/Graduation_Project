@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from Hotels.utils import func_search_hotels
-from Hotels.state_store import get_store
+from Hotels.state_store import get_store_hotels
 from Tasks.models import Tasks
 from django.utils import timezone
 from payment.utils import create_payment_intent_hotels
@@ -51,7 +51,7 @@ def booking_hotel(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,national_id
         "Your booking is ready! The Payment will appear here, Please complete the payment."
         Do NOT add any other text or explanation.
     """
-    store=get_store()
+    store=get_store_hotels()
     offer = store.get("last_offers", {}).get(offer_id) 
 
     if not offer:

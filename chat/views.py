@@ -7,8 +7,8 @@ from chat.agent import message_agent
 from rest_framework.response import Response
 from .utils import generate_title
 from threading import Thread
-from flights.state_store import get_store as get_store_hotels
-from Hotels.state_store import get_store
+from flights.state_store import get_store
+from Hotels.state_store import get_store_hotels
 from Tasks.models import Tasks
 
 @api_view(['POST'])

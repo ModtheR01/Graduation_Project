@@ -1,7 +1,7 @@
 from chat.api_keys import XRapidAPIKey_hotels
 import requests
 import json
-from Hotels.state_store import get_store
+from Hotels.state_store import get_store_hotels
 import random
 import string
 
@@ -62,7 +62,7 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
     data = response.json()
     hotels = data.get("data", {}).get("hotels", [])
     result = []
-    store=get_store()
+    store=get_store_hotels()
     for i,h in enumerate(hotels[:5],1):
         p = h.get("property", {})
         images = p.get("photoUrls", [])
