@@ -6,7 +6,42 @@ from flights.state_store import get_store
 from .serializers import todoList_items_serializer , todoList_serializer
 
 
+@tool
+def create_list(list_name: str):
+    """
+    you can use this tool to create a new todo list for the user 
+    this tool creates a new list not a new todo ,it create a whole empty list that you can add todos to it later using other tools
+    """
+    store = get_store()
+    user = store.get("user_id") # id == email so mf34 fr2 
 
+    if ToDoList.objects.filter(user=user, list_name=list_name).exists():
+        return "list already exists"
+
+    ToDoList.objects.create(user=user, list_name=list_name)
+
+    return f"list '{list_name}' created successfully"
+
+@tool 
+def delete_list(list_name: str):
+    """
+    you can use this tool to delete an already existing todo list for the user 
+    this tool deletes the whole list with all its todos not a single todo item 
+    make sure you provided the name correctly as ita stored in the database 
+    if you are not sure about the name you can get all lists name from the 'get_all_todo_lists' tool and confirm with the user 
+
+    """
+    store = get_store()
+    user = store.get("user_id") # id == email so mf34 fr2 
+
+    try:
+        todo_list = ToDoList.objects.get(user=user, list_name=list_name)
+    except ToDoList.DoesNotExist:
+        return "list not found"
+
+    todo_list.delete()
+
+    return f"list '{list_name}' deleted successfully"
 
 @tool
 def get_all_todo_lists():
