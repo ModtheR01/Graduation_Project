@@ -7,6 +7,8 @@ from flights.state_store import get_store
 from Tasks.models import Tasks
 from flights.utilities import generate_ticket_number
 from datetime import datetime
+from Hotels.models import Hotels
+from Hotels.utils import generate_booking_number
 
 stripe.api_key = Stripe_Secret
 
@@ -28,50 +30,72 @@ def stripe_webhook(request):
         payment_intent = event["data"]["object"]
         payment_intent_dict = payment_intent.to_dict()
         task_id = payment_intent_dict.get("metadata", {}).get("task_id")
-
         if not task_id:
             return HttpResponse(status=200)
-
         try:
             task = Tasks.objects.get(id=task_id)
         except Tasks.DoesNotExist:
             return HttpResponse(status=404)
-
-        flight = task.offer_data
-        time_str = flight.get("time", " → ")
-        parts = time_str.split(" → ")
-        departure_time = parts[0] if len(parts) > 0 else None
-        return_time = parts[1] if len(parts) > 1 else None
-        date_str = flight.get("date", "")
-        ticket_num = generate_ticket_number()
-        while Traveling.objects.filter(ticket_num=ticket_num).exists():
+        if task.task_type == "flight_booking":
+            flight = task.offer_data
+            time_str = flight.get("time", " → ")
+            parts = time_str.split(" → ")
+            departure_time = parts[0] if len(parts) > 0 else None
+            return_time = parts[1] if len(parts) > 1 else None
+            date_str = flight.get("date", "")
             ticket_num = generate_ticket_number()
+            while Traveling.objects.filter(ticket_num=ticket_num).exists():
+                ticket_num = generate_ticket_number()
+            try:
+                traveling, created = Traveling.objects.get_or_create(
+                    task_id=task.id,
+                    defaults={
+                        "ticket_num": ticket_num,
+                        "origin": flight.get("route", "").split(" → ")[0],
+                        "destination": flight.get("route", "").split(" → ")[-1],
+                        "departure_date": date_str,
+                        "departure_time": departure_time,
+                        "return_time": return_time,
+                        "number_of_passengers": 1,
+                        "moving_method": "Flight",
+                        "moving_service_provider": flight.get("airline", "Unknown"),
+                    }
+                )
+                if not created:
+                    return HttpResponse(status=200)  # Already exists, no need to create again
+            except Exception as e:
+                print("Error creating Traveling record:", e)
+                return HttpResponse(status=500)
+            # if task.booking_data:
+            #     task.booking_data["status"] = "confirmed"
+            #     task.save()
+            print("✅ Payment confirmed for task:", task_id)
 
-        try:
-            traveling, created = Traveling.objects.get_or_create(
-                task_id=task.id,
-                defaults={
-                    "ticket_num": ticket_num,
-                    "origin": flight.get("route", "").split(" → ")[0],
-                    "destination": flight.get("route", "").split(" → ")[-1],
-                    "departure_date": date_str,
-                    "departure_time": departure_time,
-                    "return_time": return_time,
-                    "number_of_passengers": 1,
-                    "moving_method": "Flight",
-                    "moving_service_provider": flight.get("airline", "Unknown"),
-                }
-            )
-            if not created:
-                return HttpResponse(status=200)  # Already exists, no need to create again
-        except Exception as e:
-            print("Error creating Traveling record:", e)
-            return HttpResponse(status=500)
-
-        if task.booking_data:
-            task.booking_data["status"] = "confirmed"
-            task.save()
-
-        print("✅ Payment confirmed for task:", task_id)
+        elif task.task_type == "hotel_booking":
+            hotel = task.booking_data.get("hotel", {})
+            booking_data = task.booking_data
+            
+            booking_number = generate_booking_number()  
+            while Hotels.objects.filter(booking_number=booking_number).exists():
+                booking_number = generate_booking_number()
+            try:
+                hotel_record, created = Hotels.objects.get_or_create(
+                    task_id=task.id,
+                    defaults={
+                        "booking_number": booking_number,
+                        "hotel_name": hotel.get("name"),
+                        "number_of_persons": booking_data.get("hotel", {}).get("num_of_adults"),
+                        "number_of_rooms": booking_data.get("hotel", {}).get("num_of_rooms"),
+                        "check_in_date": hotel.get("booking_info", {}).get("checkin_from"),
+                        "check_out_date": hotel.get("booking_info", {}).get("checkout_from"),
+                    }
+                )
+                if not created:
+                    return HttpResponse(status=200)
+            except Exception as e:
+                print("Error creating Hotel record:", e)
+                return HttpResponse(status=500)
+        task.booking_data["status"] = "confirmed"
+        task.save()
 
     return HttpResponse(status=200)

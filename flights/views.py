@@ -1,6 +1,4 @@
-from asyncio import Task
 from django.utils import timezone
-from urllib import response
 from django.http import JsonResponse
 import requests
 from langchain_core.tools import tool
@@ -8,7 +6,7 @@ import stripe
 from flights.state_store import get_store
 from chat.api_keys import XRapidAPIKey
 from .utilities import get_place_id
-from payment.utils import create_payment_intent
+from payment.utils import create_payment_intent_flights
 from Tasks.models import Tasks
 from flights.models import Traveling
 from chat.models import Chats
@@ -110,19 +108,6 @@ def search_flights(origin: str, destination: str, date: str):
         print("Using mock flights...")
         flights = generate_mock_flights(origin, destination, date)
 
-
-
-    # flights_text = f"{origin} → {destination} | {date}\n"
-    # for i, f in enumerate(flights, 1):
-    #     stops = "Direct" if f["direct"] else f"{f['stops']} Stop(s)"
-    #     flights_text += f"""{f['airline']}
-    #     {f['time']}  ({f['duration']})
-    #     {f['price']}
-    #     {stops}
-    #     """
-    #print("ALL OFFERS:", store["last_offers"].get(2))
-    #print("TOOL RESULT:", flights_text)
-
     store = get_store()
     store["last_offers"] = {f["id"]: f for f in flights}
     return f"[FINAL_ANSWER]{flights}"
@@ -171,7 +156,7 @@ def booking_flight(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,email:str,
     )
 
     try:
-        client_secret , payment_intent_id = create_payment_intent(booking, task_id=task.id)
+        client_secret , payment_intent_id = create_payment_intent_flights(booking, task_id=task.id)
         task.booking_data["payment_intent_id"] = payment_intent_id
         task.booking_data["client_secret"] = client_secret 
         task.save()

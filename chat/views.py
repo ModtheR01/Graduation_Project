@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from .utils import generate_title
 from threading import Thread
 from flights.state_store import get_store
+from Hotels.state_store import get_store_hotels
 from Tasks.models import Tasks
 
 @api_view(['POST'])
@@ -40,8 +41,9 @@ def send_message(request):
         })
         chat.message = messages
 
-    store= get_store()
     store["chat_id"] = chat.id
+    store_h=get_store_hotels()
+    store_h["chat_id"] = chat.id
     payment_data = None
 
     try:
@@ -49,7 +51,11 @@ def send_message(request):
             Thread(target=generate_title, args=(user_message,chat.id,request.user)).start() # generate title in a separate thread to avoid blocking the main thread
         response = message_agent(chat.message)
         print("Agent response:", response)
-        task_id = store.get("pending_payment_task_id")
+        task_id = store.get("pending_payment_task_id") or store_h.get("pending_payment_task_id")
+        print("pending_payment_task_id:", task_id)  # ← وده
+        print("Store content:", store)  # ← أضف ده
+        print("Flights Store:", get_store())        # ← أضف ده
+        print("Hotels Store:", get_store_hotels())  # ← وده
         if task_id:
             try:
                 task = Tasks.objects.get(id=task_id)

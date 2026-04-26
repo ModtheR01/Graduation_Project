@@ -1,7 +1,9 @@
 from chat.api_keys import XRapidAPIKey_hotels
 import requests
 import json
-from Hotels.state_store import get_store
+from Hotels.state_store import get_store_hotels
+import random
+import string
 
 HEADERS = {
     "x-rapidapi-key": XRapidAPIKey_hotels,
@@ -60,7 +62,7 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
     data = response.json()
     hotels = data.get("data", {}).get("hotels", [])
     result = []
-    store=get_store()
+    store=get_store_hotels()
     for i,h in enumerate(hotels[:5],1):
         p = h.get("property", {})
         images = p.get("photoUrls", [])
@@ -75,7 +77,8 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
             "real_id": h.get("hotel_id"),
             "name": p.get("name"),
             "rating": p.get("reviewScore"),
-            "price": p.get("priceBreakdown", {}).get("grossPrice", {}).get("value"),
+            "price": p.get("priceBreakdown", {}).get("grossPrice", {}).get("value")*int(num_of_rooms),
+            "num of rooms"  : num_of_rooms,
             "currency": p.get("priceBreakdown", {}).get("grossPrice", {}).get("currency"),
             "images": selected_images,
             "stars": p.get("propertyClass"),
@@ -87,9 +90,19 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
         result.append(hotel)
 
     store["last_offers"] = {h["id"]: h for h in result}
-    print(f"state_store:{store['last_offers']}")
+    #print(f"state_store:{store['last_offers']}")
+    print("Hotels API response:", str(data)[:500])
+    print("Hotels found:", len(hotels))  # ← وده
 
     return json.dumps({"hotels": result}, ensure_ascii=False)
 
 
-print(func_search_hotels("cairo","2026-05-01","2026-05-05",2,1))
+def generate_booking_number():
+    prefix = "BK"
+    random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    return f"{prefix}-{random_part}"
+
+
+
+
+#print(func_search_hotels("cairo","2026-05-01","2026-05-05",2,1))

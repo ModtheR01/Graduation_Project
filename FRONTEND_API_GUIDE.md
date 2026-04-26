@@ -2113,63 +2113,894 @@ const response = await fetch('http://localhost:8000/Users/user-info/', {
 | "Email not verified" | Ask user to verify email in Google account |
 
 # ...existing code...
+# 🏨 Hotels API Documentation
 
-## Hotel Search API
+Complete API guide for hotel search, booking, payment, and confirmation features.
 
-### Endpoint
-**Function:** `search_hotels`
+---
 
-### Description
-Searches for available hotels in a given city/country within a specified date range with support for multiple rooms and guests.
+## 📋 Table of Contents
+1. [Quick Overview](../HOTELS_BOOKING_API.md#-quick-overview)
+2. [Search Hotels](../HOTELS_BOOKING_API.md#-search-hotels)
+3. [Hotel Booking](../HOTELS_BOOKING_API.md#-hotel-booking)
+4. [Payment Processing](../HOTELS_BOOKING_API.md#-payment-processing)
+5. [Webhook Handler](../HOTELS_BOOKING_API.md#-webhook-handler)
+6. [Complete Workflow](../HOTELS_BOOKING_API.md#-complete-workflow)
+7. [Error Handling](../HOTELS_BOOKING_API.md#-error-handling)
 
-### Request Parameters
+---
 
-| Parameter | Type | Required | Description | Format/Example |
-|-----------|------|----------|-------------|---|
-| `country` | string | Yes | Name of the city or country | "Cairo", "Paris" |
-| `arr_date` | string | Yes | Check-in date | YYYY-MM-DD (e.g., "2026-04-24") |
-| `dep_date` | string | Yes | Check-out date | YYYY-MM-DD (e.g., "2026-05-05") |
-| `num_of_adults` | integer | Yes | Number of adults | Positive integer |
-| `num_of_rooms` | integer | Yes | Number of rooms needed | Positive integer |
+## 📌 Quick Overview
 
-### Response Format
+**Base URL:** `http://localhost:8000/` or `https://romee.up.railway.app/`
 
-**Success Response:**
-#	Hotel Name	Rating	Price	Stars	Check-in	Check-out	Images
-1	[Hotel Name]	[Rating]	[Price USD]	[Stars]	[Time Range]	[Time Range]	Img1, Img2
-2	[Hotel Name]	[Rating]	[Price USD]	[Stars]	[Time Range]	[Time Range]	Img1, Img2
-Would you like to book any of these hotels? Just let me
+**Authentication:** JWT Token (required for most endpoints)
 
-**Error Responses:**
-- `"no hotels found"` - No hotels available for the specified criteria
-- `"message: {error details}"` - An error occurred while processing the request
+**Payment Provider:** Stripe
 
-### Response Details
+**External APIs Used:**
+- Booking.com API via RapidAPI (for hotel search)
+- Stripe API (for payment processing)
 
-- **Rating**: Numerical rating (0-10 scale)
-- **Price**: Price per room per night in USD
-- **Stars**: Visual star rating (⭐-⭐⭐⭐⭐⭐)
-- **Images**: Always contains exactly 2 image URLs for each hotel
-- **Check-in/Check-out Times**: Available time windows (24-hour format)
+---
 
-### Example Request
+## 🔍 Search Hotels
+
+### `search_hotels()` - LangChain Tool
+
+**Location:** `backend/Hotels/views.py`
+
+**Method Type:** LangChain Tool (Called by AI Agent)
+
+**Description:** 
+Searches for available hotels in a given city/country within a specified date range. This function fetches data from the external Booking.com API and formats it for frontend consumption.
+
+**Parameters:**
+
+```python
 search_hotels(
-country="Cairo",
-arr_date="2026-04-24",
-dep_date="2026-05-05",
-num_of_adults=2,
-num_of_rooms=1
+    country: str,        # City or country name (e.g., "Cairo", "Paris")
+    arr_date: str,       # Check-in date in YYYY-MM-DD format (e.g., "2026-05-01")
+    dep_date: str,       # Check-out date in YYYY-MM-DD format (e.g., "2026-05-05")
+    num_of_adults: int,  # Number of adults (e.g., 2)
+    num_of_rooms: int    # Number of rooms (e.g., 1)
+)
+```
+
+**Return Value - Success:**
+
+The function returns a JSON string wrapped in `[FINAL_ANSWER]` tag:
+
+```json
+{
+  "[FINAL_ANSWER]{\"hotels\": [
+    {
+      \"id\": 1,
+      \"real_id\": 12345,
+      \"name\": \"LA Cairo Plaza Hotel\",
+      \"rating\": 10.0,
+      \"price\": 73.72,
+      \"num of rooms\": 1,
+      \"currency\": \"USD\",
+      \"images\": [
+        \"https://cf.bstatic.com/image1.jpg\",
+        \"https://cf.bstatic.com/image2.jpg\"
+      ],
+      \"stars\": 5,
+      \"booking_info\": {
+        \"checkin_from\": \"10:00\",
+        \"checkin_until\": \"12:00\",
+        \"checkout_from\": \"11:00\",
+        \"checkout_until\": \"13:00\"
+      }
+    },
+    {
+      \"id\": 2,
+      \"real_id\": 12346,
+      \"name\": \"Nile View Hotel\",
+      \"rating\": 8.5,
+      \"price\": 55.00,
+      \"num of rooms\": 1,
+      \"currency\": \"USD\",
+      \"images\": [...],
+      \"stars\": 4,
+      \"booking_info\": {...}
+    }
+  ]}"
+}
+```
+
+**User-Facing Display:**
+
+```
+Here are the available hotels in Cairo from 24/04/2026 to 05/05/2026:
+| # | Hotel Name | Rating | Price | Stars | Check-in | Check-out | Images |
+|---|------------|--------|-------|-------|----------|-----------|--------|
+| 1 | LA Cairo Plaza Hotel | 10.0 | 73.72 USD | ⭐⭐⭐⭐⭐ | 10:00 → 12:00 | 11:00 → 13:00 | [Img1](https://cf.bstatic.com/image1.jpg), [Img2](https://cf.bstatic.com/image2.jpg) |
+| 2 | Nile View Hotel | 8.5 | 55.00 USD | ⭐⭐⭐⭐ | 14:00 → 23:00 | 06:00 → 12:00 | [Img1](https://cf.bstatic.com/image3.jpg), [Img2](https://cf.bstatic.com/image4.jpg) |
+Would you like to book any of these hotels? Just let me know which one!
+```
+
+**Return Value - Failure:**
+
+```python
+"no hotels found"                    # When no hotels match the search criteria
+"message: {error_details}"           # When an error occurs during search
+```
+
+**Example Usage:**
+
+```python
+# Example 1: Search hotels in Cairo
+search_hotels(
+    country="Cairo",
+    arr_date="2026-05-01",
+    dep_date="2026-05-05",
+    num_of_adults=2,
+    num_of_rooms=1
 )
 
-Here are the available hotels in Cairo from 24/04/2026 to 05/05/2026:
+# Example 2: Search hotels in Paris
+search_hotels(
+    country="Paris",
+    arr_date="2026-06-10",
+    dep_date="2026-06-15",
+    num_of_adults=1,
+    num_of_rooms=1
+)
+```
 
-#	Hotel Name	Rating	Price	Stars	Check-in	Check-out	Images
-1	LA Cairo Plaza Hotel	10.0	73.72 USD	⭐⭐⭐⭐⭐	10:00 → 12:00	11:00 → 13:00	Img1, Img2
-2	Nile View Hotel	8.5	55.00 USD	⭐⭐⭐⭐	14:00 → 23:00	06:00 → 12:00	Img1, Img2
-Would you like to book any of these hotels? Just let me know which one!
+**Important Notes:**
 
-### Notes
-- Date format is flexible with separators ("-", "/", ".") but must follow: day → month → year
-- Always send dates in YYYY-MM-DD format for consistency
-- Each hotel result includes exactly 2 images
-- Results include check-in/check-out time windows for booking flexibility
+| Point | Details |
+|-------|---------|
+| ✅ Max Results | Only returns top 5 hotels |
+| ✅ Images | Always provides exactly 2 image URLs (same image repeated if only 1 available) |
+| ✅ State Storage | Results stored in `state_store["last_offers"]` for booking reference |
+| ⚠️ Date Format | Must be exactly `YYYY-MM-DD` format |
+| ⚠️ Destination Validation | City name must be recognized by Booking.com API |
+
+---
+
+## 🎫 Hotel Booking
+
+### `booking_hotel()` - LangChain Tool
+
+**Location:** `backend/Hotels/views.py`
+
+**Method Type:** LangChain Tool (Called by AI Agent)
+
+**Description:**
+Initiates a hotel booking by creating a task record and setting up payment via Stripe. Once successfully created, the booking enters "pending" status and awaits payment confirmation.
+
+**Parameters:**
+
+```python
+booking_hotel(
+    offer_id: int,           # Hotel offer ID from search results (1, 2, 3, ...)
+    Fname: str,              # First name (e.g., "Ahmed")
+    Lname: str,              # Last name (e.g., "Mohamed")
+    gender: str,             # Gender (e.g., "Male" or "Female")
+    BD: str,                 # Birth date in YYYY-MM-DD format (e.g., "1990-01-15")
+    national_id_num: int,    # National ID number
+    email: str,              # Email address
+    phone_number: str,       # Phone number with country code
+    nationality: str         # Nationality (e.g., "Egyptian")
+)
+```
+
+**Process Flow:**
+
+1. **Validate Offer ID:**
+   - Checks if offer exists in `state_store["last_offers"]`
+   - Returns error if not found
+
+2. **Create Booking Data Structure:**
+   ```python
+   {
+     "hotel": offer,  # Selected hotel data
+     "price": "73.72",  # Booking price
+     "user": {
+       "fname": "Ahmed",
+       "lname": "Mohamed",
+       "gender": "Male",
+       "birth_date": "1990-01-15",
+       "email": "ahmed@example.com",
+       "phone": "+201234567890",
+       "nationality": "Egyptian",
+       "national id number": 12345678
+     },
+     "status": "pending"
+   }
+   ```
+
+3. **Create Task in Database:**
+   - Stores booking data in `Tasks` table
+   - Links to current `chat_id`
+   - Sets `task_type = "hotel_booking"`
+
+4. **Initialize Payment Intent:**
+   - Calls `create_payment_intent_hotels()`
+   - Retrieves `client_secret` and `payment_intent_id`
+   - Stores payment references in the task
+
+**Return Values:**
+
+### ✅ Success:
+```python
+"[PAYMENT_REQUIRED]"
+```
+
+**Action Required:** Display payment confirmation message:
+```
+"Your booking is ready! The Payment will appear here, Please complete the payment."
+```
+
+### ❌ Failures:
+
+| Error | Meaning | Action |
+|-------|---------|--------|
+| `{"error": "Invalid offer ID"}` | Offer not found in search results | Perform new search |
+| `{"error": "Payment system configuration error."}` | Stripe API key issue | Contact support |
+| `{"error": "Invalid payment data: {details}"}` | Incomplete/invalid booking data | Verify all fields |
+| `{"error": "Cannot connect to payment provider. Try again."}` | Stripe API connection failure | Retry later |
+| `{"error": "Payment error. Please try again."}` | General payment error | Retry operation |
+| `{"error": "Booking data is incomplete."}` | Missing required information | Verify all user data |
+
+**Example Request:**
+
+```python
+booking_hotel(
+    offer_id=1,
+    Fname="Ahmed",
+    Lname="Mohamed",
+    gender="Male",
+    BD="1990-01-15",
+    national_id_num=12345678,
+    email="ahmed@example.com",
+    phone_number="+201234567890",
+    nationality="Egyptian"
+)
+```
+
+**Frontend Implementation Example:**
+
+```javascript
+// Handle booking response
+if (response.includes("[PAYMENT_REQUIRED]")) {
+  // Show confirmation message
+  showMessage("Your booking is ready! The Payment will appear here, Please complete the payment.");
+  
+  // Extract payment details from context
+  const { clientSecret, paymentIntentId } = getPaymentDetails();
+  
+  // Navigate to payment page
+  navigateToPayment(clientSecret);
+}
+```
+
+**Important Constraints:**
+
+| Constraint | Details |
+|-----------|---------|
+| ⚠️ Valid Offer | `offer_id` must exist in current search results |
+| ⚠️ Date Format | Birth date must be `YYYY-MM-DD` |
+| ⚠️ Phone Format | Must include country code (e.g., +201234567890) |
+| ⚠️ Email Validation | Must be a valid email format |
+| ✅ Auto-Cleanup | Failed bookings auto-delete from database |
+
+---
+
+## 💳 Payment Processing
+
+### `create_payment_intent_hotels()` - Payment Utility
+
+**Location:** `backend/payment/utils.py`
+
+**Type:** Internal utility function (called by `booking_hotel()`)
+
+**Description:**
+Creates a Stripe Payment Intent for processing hotel booking payments. This generates a `client_secret` that the frontend uses to confirm payment through Stripe.js.
+
+**Parameters:**
+
+```python
+create_payment_intent_hotels(
+    booking: dict,     # Booking data dictionary containing price and hotel info
+    task_id: int       # Database task ID for tracking
+)
+```
+
+**Booking Dictionary Structure:**
+
+```python
+{
+    "price": 73.72,  # Must be convertible to float
+    "hotel": {
+        "name": "LA Cairo Plaza Hotel"
+    },
+    "user": {
+        "email": "ahmed@example.com"
+    }
+}
+```
+
+**Internal Processing:**
+
+1. **Extract & Convert Amount:**
+   ```python
+   price_float = float(73.72)
+   price_in_cents = int(price_float * 100)  # = 7372 cents
+   ```
+
+2. **Create Stripe Payment Intent:**
+   ```python
+   stripe.PaymentIntent.create(
+       amount=7372,                          # Amount in cents
+       currency="usd",                       # USD currency
+       receipt_email="ahmed@example.com",    # Auto-send receipt
+       automatic_payment_methods={
+           "enabled": True,                  # Enable all payment methods
+           "allow_redirects": "never"        # Prevent auto-redirect
+       },
+       metadata={
+           "task_id": "123",
+           "email": "ahmed@example.com",
+           "hotel": "LA Cairo Plaza Hotel"
+       },
+       description="Hotel Name: LA Cairo Plaza Hotel"
+   )
+   ```
+
+**Return Value:**
+
+```python
+(
+    "pi_1K4y8D2eZvKYlo2CpBjzQquj_secret_abc123",  # client_secret
+    "pi_1K4y8D2eZvKYlo2CpBjzQquj"                  # payment_intent_id
+)
+```
+
+**Return Value Properties:**
+
+| Property | Usage | Where to Use |
+|----------|-------|-------------|
+| `client_secret` | Confirms payment in frontend | Send to Stripe.js |
+| `payment_intent_id` | Track payment in database | Store in Task record |
+
+**Error Handling:**
+
+```python
+stripe.error.AuthenticationError          # Invalid API credentials
+stripe.error.InvalidRequestError          # Invalid payment data
+stripe.error.APIConnectionError           # Cannot reach Stripe servers
+stripe.error.StripeError                  # Generic Stripe error
+```
+
+**Frontend Integration - Stripe.js:**
+
+```javascript
+// 1. Initialize Stripe
+const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY');
+const elements = stripe.elements();
+const cardElement = elements.create('card');
+cardElement.mount('#card-element');
+
+// 2. Confirm Payment with client_secret
+stripe.confirmCardPayment(clientSecret, {
+    payment_method: {
+        card: cardElement,
+        billing_details: {
+            name: 'Ahmed Mohamed',
+            email: 'ahmed@example.com'
+        }
+    }
+})
+.then(result => {
+    if (result.error) {
+        // Payment failed
+        console.error('Payment failed:', result.error.message);
+        showError(result.error.message);
+    } else {
+        // Payment succeeded
+        console.log('Payment successful!');
+        showSuccess('Payment completed. Your booking is confirmed.');
+    }
+});
+```
+
+**Important Notes:**
+
+| Note | Details |
+|------|---------|
+| ⚠️ Amount | Must be in **cents** (multiply by 100) |
+| ✅ Automatic Methods | Multiple payment methods enabled by default |
+| ✅ No Redirect | Prevents unwanted page redirects |
+| 📧 Receipt Email | Automatically sent to the provided email |
+| 🔒 Metadata | Used by webhook to match payment with booking |
+
+---
+
+## 🔗 Webhook Handler
+
+### `stripe_webhook()` - Payment Confirmation Handler
+
+**Location:** `backend/payment/views.py`
+
+**Endpoint:** Must be registered with Stripe (configured in backend)
+
+**Method:** POST
+
+**Description:**
+Webhook endpoint that receives payment confirmation events from Stripe. When a payment succeeds, this endpoint creates the final booking record in the database.
+
+**How It Works:**
+
+```
+1. User completes payment on frontend
+   ↓
+2. Stripe processes payment
+   ↓
+3. Stripe sends 'payment_intent.succeeded' event to webhook
+   ↓
+4. Webhook verifies Stripe signature
+   ↓
+5. Webhook retrieves task from database using metadata
+   ↓
+6. Webhook creates booking record in Hotels table
+   ↓
+7. Webhook updates task status to 'confirmed'
+```
+
+**Webhook Event Structure:**
+
+```json
+{
+    "type": "payment_intent.succeeded",
+    "data": {
+        "object": {
+            "id": "pi_1K4y8D2eZvKYlo2CpBjzQquj",
+            "status": "succeeded",
+            "amount": 7372,
+            "currency": "usd",
+            "metadata": {
+                "task_id": "123",
+                "email": "ahmed@example.com",
+                "hotel": "LA Cairo Plaza Hotel"
+            }
+        }
+    }
+}
+```
+
+**Security Verification:**
+
+```python
+# Webhook verifies signature using Stripe_Webhook_Secret
+event = stripe.Webhook.construct_event(
+    payload,           # Request body from Stripe
+    sig_header,        # Stripe-Signature header
+    Stripe_Webhook_Secret  # Secret key (prevents fake requests)
+)
+```
+
+**Processing Hotel Booking:**
+
+When `task.task_type == "hotel_booking"`:
+
+1. **Extract Hotel Data:**
+   ```python
+   hotel = task.booking_data.get("hotel", {})
+   booking_data = task.booking_data
+   ```
+
+2. **Generate Unique Booking Number:**
+   ```python
+   booking_number = "BK-A1B2C3D4"  # Format: BK-{8 random chars}
+   ```
+
+3. **Create Hotel Record:**
+   ```python
+   Hotels.objects.create(
+       task_id=123,
+       booking_number="BK-A1B2C3D4",
+       hotel_name="LA Cairo Plaza Hotel",
+       number_of_persons=booking_data.get("num_of_adults"),
+       number_of_rooms=booking_data.get("num_of_rooms"),
+       check_in_date="2026-05-01",
+       check_out_date="2026-05-05"
+   )
+   ```
+
+4. **Update Task Status:**
+   ```python
+   task.booking_data["status"] = "confirmed"
+   task.save()
+   ```
+
+**HTTP Response Codes:**
+
+| Code | Meaning | Scenario |
+|------|---------|----------|
+| 200 | Success | Payment processed / Booking already exists |
+| 400 | Bad Request | Invalid signature / malformed payload |
+| 404 | Not Found | Task ID from metadata doesn't exist |
+| 500 | Server Error | Database error creating hotel record |
+
+**Logging & Monitoring:**
+
+```python
+# Success logging
+print("✅ Payment confirmed for task: 123")
+
+# Error logging
+print("Error creating Hotel record: {error_details}")
+```
+
+**Important Security Notes:**
+
+| Security Aspect | Details |
+|-----------------|---------|
+| 🔒 Signature Verification | **Always verify** webhook signature |
+| 🔒 Idempotency | Handles duplicate events gracefully (returns 200) |
+| 🔒 No Side Effects | Failed hotel creation returns 500 without task update |
+| ✅ Auto-Retry | Stripe retries failed webhook deliveries |
+
+---
+
+## 🔄 Complete Workflow
+
+### Full User Journey
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    USER BOOKING FLOW                         │
+└─────────────────────────────────────────────────────────────┘
+
+Step 1: SEARCH PHASE
+├─ User specifies: Country, Check-in, Check-out, Guests, Rooms
+├─ Frontend triggers: search_hotels()
+├─ Backend fetches: Hotel list from Booking.com API
+├─ Response: 5 hotels with details (stored in state_store)
+└─ Display: Hotel table with options
+
+Step 2: SELECTION PHASE
+├─ User selects: Hotel #1
+├─ User provides: Personal information (name, email, phone, etc.)
+├─ Frontend validates: All required fields
+└─ Ready: For booking
+
+Step 3: BOOKING PHASE
+├─ Frontend calls: booking_hotel(offer_id=1, user_data...)
+├─ Backend creates: Task record (status: pending)
+├─ Backend calls: create_payment_intent_hotels()
+├─ Response: [PAYMENT_REQUIRED] + client_secret
+└─ Display: Payment form
+
+Step 4: PAYMENT PHASE
+├─ User enters: Card details
+├─ Frontend calls: Stripe.confirmCardPayment(clientSecret)
+├─ Stripe processes: Payment
+├─ Stripe sends: payment_intent.succeeded to webhook
+└─ Display: Processing message
+
+Step 5: CONFIRMATION PHASE
+├─ Webhook receives: Payment confirmation
+├─ Webhook verifies: Stripe signature
+├─ Webhook creates: Hotel booking record
+├─ Webhook updates: Task status to 'confirmed'
+├─ Webhook returns: HTTP 200 OK
+└─ Display: Confirmation page with booking number
+```
+
+### Example Request/Response Sequence
+
+#### Request 1: Search Hotels
+```javascript
+// Frontend
+const response = await callAI({
+  message: "Search hotels in Cairo from 2026-05-01 to 2026-05-05 for 2 adults in 1 room"
+});
+
+// Backend processes: search_hotels("Cairo", "2026-05-01", "2026-05-05", 2, 1)
+// Response includes hotel table with 5 options
+```
+
+#### Request 2: Book Hotel
+```javascript
+// Frontend
+const response = await callAI({
+  message: "Book hotel #1. My name is Ahmed Mohamed, email: ahmed@example.com, phone: +201234567890"
+});
+
+// Backend processes: booking_hotel(1, "Ahmed", "Mohamed", ..., "egyptian")
+// Response: "[PAYMENT_REQUIRED]"
+// Also returns: clientSecret, paymentIntentId
+```
+
+#### Request 3: Confirm Payment (Stripe)
+```javascript
+// Frontend
+const result = await stripe.confirmCardPayment(clientSecret, {
+  payment_method: {
+    card: cardElement,
+    billing_details: { name: 'Ahmed Mohamed' }
+  }
+});
+
+// Stripe processes payment → sends webhook
+// Backend: stripe_webhook() creates hotel booking record
+// Response: HTTP 200 OK + Task status updated to 'confirmed'
+```
+
+---
+
+## ⚠️ Error Handling
+
+### Common Issues & Solutions
+
+#### 1. "no hotels found"
+
+**Possible Causes:**
+```
+❌ City name not recognized by Booking.com API
+❌ Date format incorrect (not YYYY-MM-DD)
+❌ Invalid API key or connection issue
+```
+
+**Solutions:**
+```python
+# ✅ Correct format
+search_hotels(country="Cairo", arr_date="2026-05-01", dep_date="2026-05-05", num_of_adults=2, num_of_rooms=1)
+
+# ✅ Try alternative city names
+"Cairo" / "Giza"  # For Egypt
+"Paris" / "Île-de-France"  # For France
+
+# ✅ Verify date format
+arr_date="2026-05-01"  # ✅ Correct: YYYY-MM-DD
+arr_date="01-05-2026"  # ❌ Wrong format
+arr_date="2026/05/01"  # ❌ Wrong separator
+```
+
+#### 2. "Invalid offer ID"
+
+**Causes:**
+```
+❌ Offer ID doesn't match search results
+❌ Previous search expired
+❌ User performed new search after selection
+```
+
+**Solution:**
+```python
+# Always use IDs from current search
+# If user searches again, IDs reset (1, 2, 3, ...)
+booking_hotel(offer_id=1, ...)  # ✅ From current search results
+```
+
+#### 3. Payment System Configuration Error
+
+**Causes:**
+```
+❌ Stripe API key invalid/missing
+❌ Backend environment variables not set
+❌ Stripe account not properly configured
+```
+
+**Solution:**
+```python
+# Check environment variables
+STRIPE_SECRET_KEY = "sk_test_..."  # ✅ Should be present
+STRIPE_WEBHOOK_SECRET = "whsec_..."  # ✅ Should be present
+
+# Verify Stripe account
+- Test mode is enabled
+- API keys are valid
+- Webhook endpoint registered
+```
+
+#### 4. "Payment error. Please try again."
+
+**Causes:**
+```
+❌ Network connectivity issue
+❌ Stripe servers temporarily down
+❌ Card declined
+```
+
+**Solution:**
+```
+✅ Retry after 30 seconds
+✅ Check card validity
+✅ Verify sufficient funds
+✅ Contact Stripe support if persistent
+```
+
+#### 5. Webhook Not Triggering
+
+**Causes:**
+```
+❌ Webhook URL not registered in Stripe dashboard
+❌ Webhook endpoint returning non-200 status
+❌ Signature verification failing
+```
+
+**Solution:**
+```
+✅ Register webhook in Stripe Dashboard:
+   - Event: payment_intent.succeeded
+   - URL: https://yourdomain.com/payment/stripe-webhook/
+
+✅ Ensure endpoint returns 200 OK
+
+✅ Verify STRIPE_WEBHOOK_SECRET is correct
+```
+
+### Error Response Examples
+
+```javascript
+// Frontend error handling
+try {
+  const response = await bookHotel(bookingData);
+  
+  if (response.includes("[PAYMENT_REQUIRED]")) {
+    navigateToPayment();
+  } else if (response.error) {
+    showError(response.error);  // Display error message
+  }
+} catch (error) {
+  console.error('Booking failed:', error);
+  showError('An unexpected error occurred. Please try again.');
+}
+```
+
+---
+
+## 📊 Data Models
+
+### Hotel Object Structure
+
+```javascript
+{
+  "id": 1,                          // Sequential ID (1, 2, 3, ...)
+  "real_id": 12345,                 // Booking.com real ID
+  "name": "LA Cairo Plaza Hotel",   // Hotel name
+  "rating": 10.0,                   // Review rating (0-10)
+  "price": 73.72,                   // Total price for all rooms (USD)
+  "num of rooms": 1,                // Number of rooms
+  "currency": "USD",                // Currency code
+  "images": [                       // Hotel images
+    "https://cf.bstatic.com/image1.jpg",
+    "https://cf.bstatic.com/image2.jpg"
+  ],
+  "stars": 5,                       // Star rating (1-5)
+  "booking_info": {                 // Check-in/Check-out details
+    "checkin_from": "10:00",
+    "checkin_until": "12:00",
+    "checkout_from": "11:00",
+    "checkout_until": "13:00"
+  }
+}
+```
+
+### Task Object Structure
+
+```python
+{
+    "id": 123,
+    "chat_id": "abc-123",
+    "task_type": "hotel_booking",
+    "created_at": "2026-04-25 14:30:00",
+    "booking_data": {
+        "hotel": {...},
+        "price": 73.72,
+        "user": {
+            "fname": "Ahmed",
+            "lname": "Mohamed",
+            "gender": "Male",
+            "birth_date": "1990-01-15",
+            "email": "ahmed@example.com",
+            "phone": "+201234567890",
+            "nationality": "Egyptian",
+            "national id number": 12345678
+        },
+        "status": "pending/confirmed",
+        "payment_intent_id": "pi_...",
+        "client_secret": "pi_..._secret_..."
+    }
+}
+```
+
+### Booking Confirmation Record
+
+```python
+{
+    "id": 1,
+    "task_id": 123,
+    "booking_number": "BK-A1B2C3D4",
+    "hotel_name": "LA Cairo Plaza Hotel",
+    "number_of_persons": 2,
+    "number_of_rooms": 1,
+    "check_in_date": "2026-05-01",
+    "check_out_date": "2026-05-05",
+    "created_at": "2026-04-25 14:35:00"
+}
+```
+
+---
+
+## 🔒 Security Considerations
+
+### For Frontend Developers
+
+**DO:**
+```javascript
+✅ Use HTTPS for all requests
+✅ Store client_secret in sessionStorage (temporary)
+✅ Never log sensitive payment data
+✅ Validate user input before sending
+✅ Use official Stripe.js library
+✅ Implement CSP headers
+```
+
+**DON'T:**
+```javascript
+❌ Store card numbers (frontend)
+❌ Store client_secret in localStorage
+❌ Log payment details
+❌ Send raw card data to backend
+❌ Hardcode API keys
+❌ Use unofficial payment libraries
+```
+
+### For Backend Developers
+
+**DO:**
+```python
+✅ Store API keys in environment variables
+✅ Verify webhook signatures
+✅ Log payment events
+✅ Implement rate limiting
+✅ Use try-catch for all Stripe calls
+✅ Validate all input data
+```
+
+**DON'T:**
+```python
+❌ Hardcode API keys in code
+❌ Skip signature verification
+❌ Process payments without verification
+❌ Store card numbers
+❌ Log sensitive data to files
+❌ Trust client-provided data
+```
+
+---
+
+## 📚 Related Resources
+
+- [Stripe Documentation](https://stripe.com/docs)
+- [Stripe.js Reference](https://stripe.com/docs/js)
+- [Booking.com API](https://rapidapi.com/booking-com15/api/booking-com15)
+- [Django Documentation](https://docs.djangoproject.com/)
+- [LangChain Tools](https://python.langchain.com/docs/modules/tools/)
+
+---
+
+## 🔄 API Endpoints Summary
+
+| Function | Type | Status Code | Response |
+|----------|------|-------------|----------|
+| `search_hotels()` | LangChain Tool | N/A | JSON array of hotels |
+| `booking_hotel()` | LangChain Tool | N/A | `[PAYMENT_REQUIRED]` or error |
+| `create_payment_intent_hotels()` | Utility | N/A | `(client_secret, intent_id)` |
+| `stripe_webhook()` | Webhook | 200/400/404/500 | HTTP status |
+
+---
+
+**Last Updated:** April 25, 2026  
+**Version:** 1.0  
+**Status:** ✅ Complete
+
+For questions or updates, contact the backend development team.
