@@ -32,7 +32,7 @@ def search_in_contact():
         return "tell the user there is currently a proplem with fetching his contacts, please try again later or add the contact you want to send email to manually from the dashboard"
 
 @tool
-def add_new_contact( name, email):
+def add_new_contact(email, name):
     """
     use this tools whenever user want to save new contact by providing "email_address" and "name"
 
@@ -47,7 +47,7 @@ def add_new_contact( name, email):
     store = get_store()
     user = store.get("user_id")
     is_email_valid(email)
-    new_contact = add_contact(user,name,email)
+    new_contact = add_contact(user,email,name)
     print(new_contact)
     return new_contact
 
