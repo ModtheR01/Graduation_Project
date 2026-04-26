@@ -1,11 +1,12 @@
 from flights.state_store import get_store
-
+from Users.models import User
 from .utils import get_gmail_service
 from email.mime.text import MIMEText
 import base64
 from langchain_core.tools import tool
 from sending_emails.utils import get_all_contacts ,add_contact
 from .utils import is_email_valid 
+from.models import Contacts
 
 @tool
 def search_in_contact():
@@ -55,7 +56,26 @@ def add_new_contact(email, name):
     print(new_contact)
     return new_contact
 
+@tool 
+def delete_contact(name):
+    """
+    use this tools whenever user want to delete a contact by providing the name of the contact 
 
+    parameters:
+    name : the name associated with the email contact in db
+
+    this fucntion return a message of success or failure
+    for example : "delete the contact named anas"
+
+    """
+    store = get_store()
+    user = User.objects.get(pk=store.get("user_id"))
+    contact = Contacts.objects.get(user_email=user,nickname=name)
+    if contact:
+        contact.delete()
+        return f"contact named {name} has been deleted successfully"
+    else:
+        return f"contact named {name} not found in your contacts, please check the name and try again"
 
 @tool
 def send_email( to, subject, body, is_approved=False):
