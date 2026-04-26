@@ -31,6 +31,7 @@ def get_all_contacts(user):
                 "receiver_email": contact.receiver_email,
                 "nickname": contact.nickname,
             })
+        return absstracted_contacts
     except Contacts.DoesNotExist:
         return "this user has no contacts yet, please ask him to add some contacts first " 
 
