@@ -21,8 +21,10 @@ load_dotenv()
 # contacts related functions
 
 def get_all_contacts(user):
+    user_obj = User.objects.get(pk=user)
+    print("user object in get_all_contacts:", user_obj)
     try:
-        contacts = Contacts.objects.filter(user_email=user)
+        contacts = Contacts.objects.filter(user_email=user_obj)
         absstracted_contacts = [] # we want to return only the email and the name not the whole object with all its attributes to not confuse the stupid model 
         for contact in contacts:
             absstracted_contacts.append({   
@@ -33,8 +35,10 @@ def get_all_contacts(user):
         return "this user has no contacts yet, please ask him to add some contacts first " 
 
 def add_contact(user,email,name):
+    user_obj = User.objects.get(pk=user)
+    print("user object in add_contact:", user_obj)
     try:
-        new_contact = Contacts.objects.create(user_email=user,receiver_email=email,nickname=name)
+        new_contact = Contacts.objects.create(user_email=user_obj,receiver_email=email,nickname=name)
         new_contact.save()
         return {"receiver_email": new_contact.receiver_email,"nickname": new_contact.nickname}
     except Exception as e:
