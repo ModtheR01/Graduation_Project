@@ -18,6 +18,44 @@ def get_all_lists(request):
         return Response({"data":serialized_todo_lists.data} ,status=200)
     return Response({"error": "there is no available lists for this user "})
 
+@api_view(['POST'])
+def create_list_view(request):
+    user = request.user
+    list_name = request.data.get("list_name")
+
+    if not list_name:
+        return Response({"error": "list_name is required"}, status=400)
+
+    if ToDoList.objects.filter(user=user, list_name=list_name).exists():
+        return Response({"error": "list already exists"}, status=400)
+
+    ToDoList.objects.create(user=user, list_name=list_name)
+
+    return Response({
+        "status": "created",
+        "list_name": list_name
+    })
+
+@api_view(['DELETE'])
+def delete_list_view(request):
+    user = request.user
+    list_name = request.data.get("list_name")
+
+    if not list_name:
+        return Response({"error": "list_name is required"}, status=400)
+
+    try:
+        todo_list = ToDoList.objects.get(user=user, list_name=list_name)
+    except ToDoList.DoesNotExist:
+        return Response({"error": "list not found"}, status=404)
+
+    todo_list.delete()
+
+    return Response({
+        "status": "deleted",
+        "list_name": list_name
+    })
+
 @api_view(['GET'])
 def get_items_in_list(request, list_name):
     user = request.user
