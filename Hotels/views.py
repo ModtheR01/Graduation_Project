@@ -6,6 +6,8 @@ from django.utils import timezone
 from payment.utils import create_payment_intent_hotels
 import stripe
 import traceback
+from django.http import JsonResponse
+from Hotels.models import Hotels
 
 @tool
 def search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
@@ -105,3 +107,55 @@ def booking_hotel(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,national_id
     except (AttributeError, KeyError) as e:
         task.delete()
         return {"error": "Booking data is incomplete."}
+
+
+
+def get_hotel_booking(request):
+    task_id = request.GET.get("task_id")
+
+    if not task_id:
+        return JsonResponse({"error": "task_id is required"}, status=400)
+
+    try:
+        task = Tasks.objects.get(id=task_id)
+    except Tasks.DoesNotExist:
+        return JsonResponse({"error": "Task not found"}, status=404)
+
+    if task.booking_data.get("status") != "confirmed":
+        payment_intent_id = task.booking_data.get("payment_intent_id")
+        if not payment_intent_id:
+            return JsonResponse({"error": "Payment not initiated"}, status=400)
+        try:
+            intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+            if intent.status == "succeeded":
+                task.booking_data["status"] = "confirmed"
+                task.save()
+        except stripe.error.StripeError:
+            return JsonResponse({"error": "Could not verify payment"}, status=500)
+
+    if task.booking_data.get("status") != "confirmed":
+        return JsonResponse({"error": "Payment not confirmed yet"}, status=402)
+
+    hotel_record = Hotels.objects.filter(task_id=task.id).first()
+    if not hotel_record:
+        return JsonResponse({"error": "Booking not ready yet"}, status=404)
+
+    booking = task.booking_data
+
+    return JsonResponse({
+        "booking": {
+            "booking_number": hotel_record.booking_number,
+            "hotel_name": hotel_record.hotel_name,
+            "check_in": str(hotel_record.check_in_date),
+            "check_out": str(hotel_record.check_out_date),
+            "rooms": hotel_record.number_of_rooms,
+            "persons": hotel_record.number_of_persons,
+            "guest": {
+                "fname": booking["user"].get("fname"),
+                "lname": booking["user"].get("lname"),
+                "email": booking["user"].get("email"),
+                "nationality": booking["user"].get("nationality"),
+            },
+            "status": booking.get("status"),
+        }
+    })

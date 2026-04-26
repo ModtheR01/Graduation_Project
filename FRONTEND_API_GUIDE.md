@@ -2648,6 +2648,436 @@ print("Error creating Hotel record: {error_details}")
 
 ---
 
+## 🎟️ Get Hotel Booking
+
+### `get_hotel_booking()` - Booking Confirmation Retrieval
+
+**Location:** `backend/Hotels/views.py`
+
+**Endpoint:** `GET /Hotels/get_hotel_booking/`
+
+**Method Type:** HTTP GET Request
+
+**Description:**
+Retrieves the complete hotel booking confirmation details after successful payment. This endpoint verifies that the payment has been confirmed via Stripe, ensures the booking record exists, and returns all relevant booking information to the frontend for display.
+
+**Parameters:**
+
+```
+GET /Hotels/get_hotel_booking/?task_id=<task_id>
+```
+
+| Parameter | Type | Required | Notes |
+|-----------|------|----------|-------|
+| task_id | integer | ✅ | Task ID returned from payment processing |
+
+**Request Headers:**
+```
+Authorization: Bearer <JWT_ACCESS_TOKEN>
+Content-Type: application/json
+```
+
+**Process Flow:**
+
+1. **Retrieve Task Record:**
+   - Fetches the Task object from database using `task_id`
+   - Returns 404 if task not found
+
+2. **Verify Payment Status:**
+   - Checks if booking status is "confirmed"
+   - If not confirmed, checks Stripe payment intent status
+   - Updates task status to "confirmed" if payment succeeded
+
+3. **Validate Hotel Record:**
+   - Ensures corresponding hotel booking record exists in database
+   - Returns 404 if hotel record not created yet
+
+4. **Return Booking Details:**
+   - Formats and returns all booking information
+   - Includes guest details, hotel info, and confirmation number
+
+**Example Request (cURL):**
+
+```bash
+curl -X GET "http://localhost:8000/Hotels/get_hotel_booking/?task_id=123" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+**Example Request (JavaScript/Fetch):**
+
+```javascript
+const taskId = 123;  // Received from booking_hotel response
+const accessToken = localStorage.getItem('accessToken');
+
+const response = await fetch(`http://localhost:8000/Hotels/get_hotel_booking/?task_id=${taskId}`, {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+const bookingData = await response.json();
+
+if (response.ok) {
+  console.log('Booking Confirmed:', bookingData.booking);
+  // Display booking details to user
+} else {
+  console.error('Error:', bookingData.error);
+}
+```
+
+**✅ Success Response (200 OK):**
+
+```json
+{
+  "booking": {
+    "booking_number": "BK-A1B2C3D4",
+    "hotel_name": "LA Cairo Plaza Hotel",
+    "check_in": "2026-05-01",
+    "check_out": "2026-05-05",
+    "rooms": 1,
+    "persons": 2,
+    "guest": {
+      "fname": "Ahmed",
+      "lname": "Mohamed",
+      "email": "ahmed@example.com",
+      "nationality": "Egyptian"
+    },
+    "status": "confirmed"
+  }
+}
+```
+
+**Response Field Details:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| booking_number | string | Unique confirmation number (Format: BK-{8 chars}) |
+| hotel_name | string | Name of the booked hotel |
+| check_in | date | Check-in date (YYYY-MM-DD format) |
+| check_out | date | Check-out date (YYYY-MM-DD format) |
+| rooms | integer | Number of booked rooms |
+| persons | integer | Number of guests |
+| guest.fname | string | Guest first name |
+| guest.lname | string | Guest last name |
+| guest.email | string | Guest email address |
+| guest.nationality | string | Guest nationality |
+| status | string | Booking status (always "confirmed" for success) |
+
+**❌ Error Responses:**
+
+### ❌ Missing task_id Parameter (400 Bad Request)
+
+```json
+{
+  "error": "task_id is required"
+}
+```
+
+**Solution:** Include `task_id` as query parameter in the URL.
+
+```javascript
+// ✅ Correct
+/Hotels/get_hotel_booking/?task_id=123
+
+// ❌ Wrong
+/Hotels/get_hotel_booking/
+```
+
+---
+
+### ❌ Task Not Found (404 Not Found)
+
+```json
+{
+  "error": "Task not found"
+}
+```
+
+**Possible Causes:**
+- Invalid `task_id` provided
+- Task was deleted from database
+- Task ID from different user
+
+**Solution:**
+```
+✅ Verify task_id is correct
+✅ Ensure booking was initiated by this user
+✅ Check task_id immediately after booking
+```
+
+---
+
+### ❌ Payment Not Initiated (400 Bad Request)
+
+```json
+{
+  "error": "Payment not initiated"
+}
+```
+
+**Meaning:** Task exists but no payment intent was created.
+
+**Possible Causes:**
+- Booking creation failed before payment
+- Incomplete payment setup
+
+**Solution:** Reattempt booking from beginning.
+
+---
+
+### ❌ Payment Not Confirmed (402 Payment Required)
+
+```json
+{
+  "error": "Payment not confirmed yet"
+}
+```
+
+**Meaning:** Payment has not been verified yet.
+
+**Possible Causes:**
+- Stripe webhook hasn't processed payment yet
+- User hasn't completed payment
+- Payment is still pending
+
+**Solution:**
+```
+✅ Wait a few seconds (webhook may be processing)
+✅ Retry the request
+✅ Verify payment was completed in Stripe dashboard
+```
+
+---
+
+### ❌ Hotel Record Not Ready (404 Not Found)
+
+```json
+{
+  "error": "Booking not ready yet"
+}
+```
+
+**Meaning:** Payment is confirmed, but hotel booking record hasn't been created yet.
+
+**Possible Causes:**
+- Webhook processing delay
+- Database transaction in progress
+- Webhook failed to create hotel record
+
+**Solution:**
+```
+✅ Retry after 2-3 seconds
+✅ Check browser console for errors
+✅ Verify webhook is configured correctly
+✅ Contact support if persists
+```
+
+---
+
+### ❌ Could Not Verify Payment (500 Internal Server Error)
+
+```json
+{
+  "error": "Could not verify payment"
+}
+```
+
+**Meaning:** Backend failed to check payment status with Stripe.
+
+**Possible Causes:**
+- Stripe API connection failure
+- Invalid Stripe API key
+- Stripe account issues
+
+**Solution:**
+```
+✅ Retry after 30 seconds
+✅ Check if Stripe is operational
+✅ Contact support
+```
+
+---
+
+### ❌ Not Authenticated (401 Unauthorized)
+
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+**Meaning:** JWT token is missing or invalid.
+
+**Solution:**
+```javascript
+// ✅ Ensure token is included
+const accessToken = localStorage.getItem('accessToken');
+if (!accessToken) {
+  // User must log in
+  redirectToLogin();
+}
+```
+
+---
+
+## 🔄 Complete Booking Flow with get_hotel_booking()
+
+### Full User Journey Including Confirmation
+
+```
+Step 1: SEARCH HOTELS
+└─ User: "Find hotels in Cairo from 2026-05-01 to 2026-05-05"
+└─ Response: 5 hotels displayed
+
+Step 2: BOOK SELECTED HOTEL
+└─ User: "Book hotel #1 with my details..."
+└─ Backend: Creates task, generates payment intent
+└─ Response: "[PAYMENT_REQUIRED]" + client_secret
+└─ Store: Save task_id for later confirmation
+
+Step 3: PROCESS PAYMENT
+└─ Frontend: stripe.confirmCardPayment(clientSecret)
+└─ User: Completes payment in Stripe modal
+└─ Backend: Webhook creates hotel booking record
+└─ Status: Task marked as "confirmed"
+
+Step 4: RETRIEVE BOOKING CONFIRMATION (← This step)
+└─ Frontend: GET /Hotels/get_hotel_booking/?task_id=123
+└─ Backend: Verifies payment, returns booking details
+└─ Frontend: Display confirmation with booking number
+└─ User: Sees: BK-A1B2C3D4, Hotel name, Check-in/out dates
+```
+
+---
+
+### Frontend Integration Example
+
+```javascript
+// Step 1: Extract task_id from payment response
+let bookingTaskId;
+
+async function initiateBooking() {
+  const bookingResponse = await fetch('/chat/chat/', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: `Book hotel #1 with details: Ahmed Mohamed, Male, 1990-01-15, ahmed@example.com, +201234567890, 12345678, Egyptian`,
+      chat_id: currentChatId
+    })
+  });
+
+  const bookingData = await bookingResponse.json();
+  
+  // Extract task_id from payment data
+  if (bookingData.payment_data) {
+    bookingTaskId = bookingData.payment_data.task_id;
+    console.log('Task ID saved:', bookingTaskId);
+    
+    // Proceed to payment
+    await processPayment(bookingData.payment_data.client_secret);
+  }
+}
+
+// Step 2: After payment succeeds, retrieve booking
+async function retrieveBookingConfirmation() {
+  try {
+    const response = await fetch(`/Hotels/get_hotel_booking/?task_id=${bookingTaskId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.status === 402) {
+      // Payment not confirmed yet, retry after delay
+      console.log('Payment confirmation pending, retrying...');
+      setTimeout(retrieveBookingConfirmation, 2000);
+      return;
+    }
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error);
+    }
+
+    const bookingData = await response.json();
+    displayBookingConfirmation(bookingData.booking);
+    
+  } catch (error) {
+    console.error('Failed to retrieve booking:', error);
+    showErrorMessage(error.message);
+  }
+}
+
+// Step 3: Display confirmation to user
+function displayBookingConfirmation(booking) {
+  const confirmationHTML = `
+    <div class="booking-confirmation">
+      <h2>✅ Booking Confirmed!</h2>
+      <p><strong>Booking Number:</strong> ${booking.booking_number}</p>
+      <p><strong>Hotel:</strong> ${booking.hotel_name}</p>
+      <p><strong>Check-in:</strong> ${booking.check_in}</p>
+      <p><strong>Check-out:</strong> ${booking.check_out}</p>
+      <p><strong>Rooms:</strong> ${booking.rooms}</p>
+      <p><strong>Guests:</strong> ${booking.persons}</p>
+      <p><strong>Guest Name:</strong> ${booking.guest.fname} ${booking.guest.lname}</p>
+      <p><strong>Email:</strong> ${booking.guest.email}</p>
+      <p><strong>Status:</strong> ${booking.status}</p>
+    </div>
+  `;
+  
+  document.getElementById('booking-confirmation-container').innerHTML = confirmationHTML;
+}
+```
+
+---
+
+### Timing Considerations
+
+| Step | Typical Duration | Notes |
+|------|-----------------|-------|
+| Payment processing | 1-2 seconds | Stripe processes immediately |
+| Webhook delivery | 1-5 seconds | AWS queue may add delay |
+| Hotel record creation | <1 second | Instant database insert |
+| **Total delay** | **2-6 seconds** | Recommend 1-second polling/retry |
+
+**Frontend Recommendation:**
+```javascript
+// Poll for confirmation (user-friendly approach)
+async function pollForConfirmation(maxAttempts = 10) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await fetch(`/Hotels/get_hotel_booking/?task_id=${bookingTaskId}`, {...});
+      
+      if (response.ok) {
+        return await response.json();
+      }
+      
+      if (response.status !== 402) {
+        throw new Error(await response.json());
+      }
+      
+      // Status 402: Not ready yet, wait and retry
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+    } catch (error) {
+      console.error('Attempt', attempt + 1, 'failed:', error);
+    }
+  }
+  
+  throw new Error('Booking confirmation timeout. Please refresh to check status.');
+}
+```
+
+---
+
 ## 🔄 Complete Workflow
 
 ### Full User Journey
