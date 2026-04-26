@@ -4,7 +4,7 @@ from .models import ToDoList
 from .models import ToDoItems
 from flights.state_store import get_store
 from .serializers import todoList_items_serializer , todoList_serializer
-
+from Users.models import User
 
 @tool
 def create_list(list_name: str):
@@ -13,7 +13,8 @@ def create_list(list_name: str):
     this tool creates a new list not a new todo ,it create a whole empty list that you can add todos to it later using other tools
     """
     store = get_store()
-    user = store.get("user_id") # id == email so mf34 fr2 
+    user_email = store.get("user_id") # id == email so mf34 fr2 
+    user = User.objects.get(pk=user_email)
 
     if ToDoList.objects.filter(user=user, list_name=list_name).exists():
         return "list already exists"
@@ -32,7 +33,8 @@ def delete_list(list_name: str):
 
     """
     store = get_store()
-    user = store.get("user_id") # id == email so mf34 fr2 
+    user_email = store.get("user_id") # id == email so mf34 fr2 
+    user = User.objects.get(pk=user_email)
 
     try:
         todo_list = ToDoList.objects.get(user=user, list_name=list_name)
