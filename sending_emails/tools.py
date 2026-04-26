@@ -14,6 +14,10 @@ def search_in_contact():
     this fucntion return a list of all available contact in the database so you can compare the name you got with the list of names here 
     to get the associated email
 
+    the user might also provide the contact in another language but its the same contact for example (modther = مدثر)(anas = انس) and so on 
+    take care the user might also send an appreviation of the name so instead of "dr.ahmed" he might say send it to my doc or my doctor 
+    in any of these cases while you are not sure what exactly the contact the user is refaring to you can ask hime to confirm
+
     this tool will provide you with the list of contacts of the user
 
     for example : "send email to ahmed"
