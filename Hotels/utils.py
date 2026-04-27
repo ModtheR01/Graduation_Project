@@ -79,6 +79,7 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
             "rating": p.get("reviewScore"),
             "price": p.get("priceBreakdown", {}).get("grossPrice", {}).get("value")*int(num_of_rooms),
             "num of rooms"  : num_of_rooms,
+            "num of adults" : num_of_adults,
             "currency": p.get("priceBreakdown", {}).get("grossPrice", {}).get("currency"),
             "images": selected_images,
             "stars": p.get("propertyClass"),
@@ -89,6 +90,9 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
         }
         result.append(hotel)
 
+
+    store["arr_date"] = arr_date  
+    store["dep_date"] = dep_date  
     store["last_offers"] = {h["id"]: h for h in result}
     #print(f"state_store:{store['last_offers']}")
     print("Hotels API response:", str(data)[:500])

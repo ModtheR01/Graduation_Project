@@ -64,6 +64,8 @@ def booking_hotel(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,national_id
     booking = {
         "hotel": offer,
         "price": offer["price"],
+        "num_of_rooms": offer.get("num of rooms",0),   
+        "num_of_adults": offer.get("num of adults",0),
         "user": {
             "fname": Fname,
             "lname": Lname,
@@ -142,11 +144,11 @@ def get_hotel_booking(request):
         return JsonResponse({"error": "Booking not ready yet"}, status=404)
 
     booking = task.booking_data
-    hotels=Hotels.objects.filter(task_id=int(task_id))
+    # hotels=Hotels.objects.filter(task_id=int(task_id))
 
-    if not hotels:
-        print("Hotel booking not saved yet")
-        return JsonResponse({"error": "Hotel booking not ready yet"}, status=404)
+    # if not hotels:
+    #     print("Hotel booking not saved yet")
+    #     return JsonResponse({"error": "Hotel booking not ready yet"}, status=404)
 
     message={
         "booking": {
