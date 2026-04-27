@@ -17,6 +17,7 @@ def send_message(request):
     chat_id = request.data.get('chat_id') # catch the chat_id will be sent by frontend developer in JSON 'in request' , if it not catched -> chat_id=none
     store = get_store()
     store["user_id"] = request.user.pk
+    store["pending_payment_task_id"] = None 
     user_message = request.data.get('message') # catch the user message 
     print("user",request.user ,type(request.user))
     if not user_message:
@@ -44,6 +45,7 @@ def send_message(request):
     store["chat_id"] = chat.id
     store_h=get_store_hotels()
     store_h["chat_id"] = chat.id
+    store_h["pending_payment_task_id"] = None  
     payment_data = None
 
     try:
