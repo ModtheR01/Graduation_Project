@@ -8,6 +8,7 @@ import stripe
 import traceback
 from django.http import JsonResponse
 from Hotels.models import Hotels
+from chat.models import Chats
 
 @tool
 def search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
@@ -141,6 +142,42 @@ def get_hotel_booking(request):
         return JsonResponse({"error": "Booking not ready yet"}, status=404)
 
     booking = task.booking_data
+    hotels=Hotels.objects.filter(task_id=int(task_id))
+
+    if not hotels:
+        print("Hotel booking not saved yet")
+        return JsonResponse({"error": "Hotel booking not ready yet"}, status=404)
+
+    message={
+        "booking": {
+            "booking_number": hotel_record.booking_number,
+            "hotel_name": hotel_record.hotel_name,
+            "check_in": str(hotel_record.check_in_date),
+            "check_out": str(hotel_record.check_out_date),
+            "rooms": hotel_record.number_of_rooms,
+            "persons": hotel_record.number_of_persons,
+            "guest": {
+                "fname": booking["user"].get("fname"),
+                "lname": booking["user"].get("lname"),
+                "email": booking["user"].get("email"),
+                "nationality": booking["user"].get("nationality"),
+            },
+            "status": booking.get("status"),
+        }
+    }
+
+    chat_id=task.chat_id
+    chat = Chats.objects.filter(id=chat_id).first()
+
+    if chat:
+        print("chat exist")
+        messages = chat.message or []
+        messages.append({
+            "role": "assistant",
+            "content": message
+        })
+        chat.message = messages
+        chat.save()
 
     return JsonResponse({
         "booking": {

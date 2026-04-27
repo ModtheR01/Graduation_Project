@@ -52,10 +52,10 @@ def send_message(request):
         response = message_agent(chat.message)
         print("Agent response:", response)
         task_id = store.get("pending_payment_task_id") or store_h.get("pending_payment_task_id")
-        print("pending_payment_task_id:", task_id)  # ← وده
-        print("Store content:", store)  # ← أضف ده
-        print("Flights Store:", get_store())        # ← أضف ده
-        print("Hotels Store:", get_store_hotels())  # ← وده
+        print("pending_payment_task_id:", task_id)  
+        print("Store content:", store)  
+        print("Flights Store:", get_store())      
+        print("Hotels Store:", get_store_hotels()) 
         if task_id:
             try:
                 task = Tasks.objects.get(id=task_id)
