@@ -64,6 +64,8 @@ def booking_hotel(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,national_id
     booking = {
         "hotel": offer,
         "price": offer["price"],
+        "arr_date": store.get("arr_date"),  
+        "dep_date": store.get("dep_date"), 
         "num_of_rooms": offer.get("num of rooms",0),   
         "num_of_adults": offer.get("num of adults",0),
         "user": {
@@ -78,6 +80,8 @@ def booking_hotel(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,national_id
         },
         "status": "pending"
     }
+    print("arr_date:", store.get("arr_date"))
+    print("dep_date:", store.get("dep_date"))
 
     chat_id = store.get("chat_id") # in view of chat we store the chat_id in state store after creating a new chat or getting an existing one
     task=Tasks.objects.create(
