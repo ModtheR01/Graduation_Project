@@ -35,7 +35,7 @@ def create_calendar_event_tool( title: str, start_time_iso: str):
     store = get_store()
     user = store.get("user_id")
     user_obj = User.objects.get(pk=user)
-    access_token = Tokens.objects.get(user_email=user_obj).access_token
+    access_token = Tokens.objects.get(user=user_obj).access_token
 
     # 🔹 2. حول الوقت
     start_time = start_time_iso
