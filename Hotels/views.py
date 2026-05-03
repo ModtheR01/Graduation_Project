@@ -8,6 +8,7 @@ import stripe
 import traceback
 from django.http import JsonResponse
 from Hotels.models import Hotels
+from chat.models import Chats
 
 @tool
 def search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
@@ -63,6 +64,10 @@ def booking_hotel(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,national_id
     booking = {
         "hotel": offer,
         "price": offer["price"],
+        "arr_date": store.get("arr_date"),  
+        "dep_date": store.get("dep_date"), 
+        "num_of_rooms": offer.get("num of rooms",0),   
+        "num_of_adults": offer.get("num of adults",0),
         "user": {
             "fname": Fname,
             "lname": Lname,
@@ -75,6 +80,8 @@ def booking_hotel(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,national_id
         },
         "status": "pending"
     }
+    print("arr_date:", store.get("arr_date"))
+    print("dep_date:", store.get("dep_date"))
 
     chat_id = store.get("chat_id") # in view of chat we store the chat_id in state store after creating a new chat or getting an existing one
     task=Tasks.objects.create(
@@ -141,6 +148,42 @@ def get_hotel_booking(request):
         return JsonResponse({"error": "Booking not ready yet"}, status=404)
 
     booking = task.booking_data
+    # hotels=Hotels.objects.filter(task_id=int(task_id))
+
+    # if not hotels:
+    #     print("Hotel booking not saved yet")
+    #     return JsonResponse({"error": "Hotel booking not ready yet"}, status=404)
+
+    message={
+        "booking": {
+            "booking_number": hotel_record.booking_number,
+            "hotel_name": hotel_record.hotel_name,
+            "check_in": str(hotel_record.check_in_date),
+            "check_out": str(hotel_record.check_out_date),
+            "rooms": hotel_record.number_of_rooms,
+            "persons": hotel_record.number_of_persons,
+            "guest": {
+                "fname": booking["user"].get("fname"),
+                "lname": booking["user"].get("lname"),
+                "email": booking["user"].get("email"),
+                "nationality": booking["user"].get("nationality"),
+            },
+            "status": booking.get("status"),
+        }
+    }
+
+    chat_id=task.chat_id
+    chat = Chats.objects.filter(id=chat_id).first()
+
+    if chat:
+        print("chat exist")
+        messages = chat.message or []
+        messages.append({
+            "role": "assistant",
+            "content": message
+        })
+        chat.message = messages
+        chat.save()
 
     return JsonResponse({
         "booking": {

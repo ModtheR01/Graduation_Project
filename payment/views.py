@@ -84,10 +84,10 @@ def stripe_webhook(request):
                     defaults={
                         "booking_number": booking_number,
                         "hotel_name": hotel.get("name"),
-                        "number_of_persons": booking_data.get("hotel", {}).get("num_of_adults"),
-                        "number_of_rooms": booking_data.get("hotel", {}).get("num_of_rooms"),
-                        "check_in_date": hotel.get("booking_info", {}).get("checkin_from"),
-                        "check_out_date": hotel.get("booking_info", {}).get("checkout_from"),
+                        "number_of_persons": booking_data.get("num_of_adults"),  
+                        "number_of_rooms": booking_data.get("num_of_rooms"),     
+                        "check_in_date": booking_data.get("arr_date"),           
+                        "check_out_date": booking_data.get("dep_date"), 
                     }
                 )
                 if not created:
