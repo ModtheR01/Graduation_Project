@@ -5,6 +5,7 @@ from langchain_core.tools import tool
 import requests
 from Users.models import User
 from sending_emails.models import Tokens
+from sending_emails.utils import get_valid_access_token
 
 
 GOOGLE_CALENDAR_URL = "https://www.googleapis.com/calendar/v3/calendars/primary/events"
@@ -35,7 +36,7 @@ def create_calendar_event_tool( title: str, start_time_iso: str):
     store = get_store()
     user = store.get("user_id")
     user_obj = User.objects.get(pk=user)
-    access_token = Tokens.objects.get(user=user_obj).access_token
+    access_token = get_valid_access_token(user_obj)
 
     # 🔹 2. حول الوقت
     start_time = start_time_iso
