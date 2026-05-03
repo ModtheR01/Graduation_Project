@@ -61,7 +61,7 @@ GOOGLE_REDIRECT_URI= os.getenv("GOOGLE_REDIRECT_URI")
 OAUTH_AUTH_URL= os.getenv("OAUTH_AUTH_URL")
 OAUTH_TOKEN_URL= os.getenv("OAUTH_TOKEN_URL")
 # this scope tells gmail that we will only use user token to send emails and access user data(email)
-SCOPE = "openid email https://www.googleapis.com/auth/gmail.send"
+SCOPE = "openid email https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar.events"
 
 
 
