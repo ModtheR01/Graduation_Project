@@ -9,7 +9,7 @@ from flights.views import search_flights
 from sending_emails.tools import search_in_contact, add_new_contact, send_email ,delete_contact
 from Hotels.views import search_hotels,booking_hotel
 from TO_DO_List.tools import get_all_todo_lists, get_items_inList ,manage_todo ,create_list, delete_list
-from Reminder.tools import get_current_datetime
+from Reminder.tools import get_current_datetime , create_calendar_event_tool
 # print(create_agent)
 llm = ChatOpenAI(
     model=default_model,
@@ -22,7 +22,7 @@ llm = ChatOpenAI(
     }
 )
 #  all tools added now except for reminder
-tools = [search_flights,booking_flight,delete_contact, send_email,search_hotels,booking_hotel,get_all_todo_lists,get_items_inList,manage_todo,search_in_contact, add_new_contact,create_list,delete_list,get_current_datetime]
+tools = [search_flights,booking_flight,delete_contact, send_email,search_hotels,booking_hotel,get_all_todo_lists,get_items_inList,manage_todo,search_in_contact, add_new_contact,create_list,delete_list,get_current_datetime,create_calendar_event_tool]
 #tools = [search_flights,send_email] 
 agent = create_agent(llm, tools=tools)
 print("agent created ....")

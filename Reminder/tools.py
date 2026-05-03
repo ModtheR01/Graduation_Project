@@ -21,10 +21,10 @@ def get_current_datetime():
 def create_calendar_event_tool( title: str, start_time_iso: str):
     """
     Create a Google Calendar event with a reminder.
+    use this tool whenever the user ask you to create a reminder for him or to create an event in his calendar for example if he said "remind me to go to the doctor at 5 pm tomorrow" you can use this tool to create an event in his google calendar with a reminder 45 minutes before the event
 
     Args:
-        user: Django user (must have access_token & refresh_token saved)
-        title (str): event title
+        title (str): event title (e.g. "Doctor's appointment")
         start_time_iso (str): ISO datetime string (e.g. 2026-05-04T18:00:00)
 
     Returns:
