@@ -6,7 +6,7 @@ from Users.models import User
 class ToDoList(models.Model):
     list_name = models.CharField(primary_key=True, max_length=50)
     user = models.ForeignKey(User, models.CASCADE)
-    task = models.OneToOneField(Tasks, models.DO_NOTHING , null=True, blank=True)
+    task = models.OneToOneField(Tasks,models.CASCADE)
     finished = models.BooleanField(blank=True, null=True ,default=False)
 
     class Meta:
