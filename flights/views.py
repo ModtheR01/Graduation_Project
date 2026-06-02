@@ -51,10 +51,6 @@ def search_flights(origin: str, destination: str, date: str):
             | 2 | القاهرة → باريس | 2026-05-05 | 03:10 → 09:50 | 7h 40m | $344 | LOT | توقف واحد |
             | 3 | القاهرة → باريس | 2026-05-05 | 17:35 → 20:00 | 27h 25m | $442 | Emirates | مباشر |
 
-            - 🏆 **الأسرع (Fastest):** Emirates
-            - 💰 **الأرخص (Cheapest):** LOT 
-            - ✨ **الأفضل (Best):** Lufthansa
-
             هل تود حجز أي من هذه الرحلات؟"
     """
     print("🔥 search_flights CALLED")
@@ -105,7 +101,7 @@ def search_flights(origin: str, destination: str, date: str):
         flights = []
 
     if not flights:
-        print("Using mock flights...")
+        print("🔥Using mock flights...")
         flights = generate_mock_flights(origin, destination, date)
 
     store = get_store()
