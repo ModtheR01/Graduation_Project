@@ -158,8 +158,8 @@ def get_hotel_booking(request):
         "booking": {
             "booking_number": hotel_record.booking_number,
             "hotel_name": hotel_record.hotel_name,
-            "check_in": str(hotel_record.check_in_date),
-            "check_out": str(hotel_record.check_out_date),
+            "check_in": hotel_record.check_in_date.strftime("%Y-%m-%d") if hotel_record.check_in_date else None,
+            "check_out": hotel_record.check_out_date.strftime("%Y-%m-%d") if hotel_record.check_out_date else None,
             "rooms": hotel_record.number_of_rooms,
             "persons": hotel_record.number_of_persons,
             "guest": {
@@ -189,8 +189,8 @@ def get_hotel_booking(request):
         "booking": {
             "booking_number": hotel_record.booking_number,
             "hotel_name": hotel_record.hotel_name,
-            "check_in": str(hotel_record.check_in_date),
-            "check_out": str(hotel_record.check_out_date),
+            "check_in": hotel_record.check_in_date.strftime("%Y-%m-%d") if hotel_record.check_in_date else None,
+            "check_out": hotel_record.check_out_date.strftime("%Y-%m-%d") if hotel_record.check_out_date else None,
             "rooms": hotel_record.number_of_rooms,
             "persons": hotel_record.number_of_persons,
             "guest": {
