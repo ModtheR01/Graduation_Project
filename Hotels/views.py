@@ -180,7 +180,8 @@ def get_hotel_booking(request):
         messages = chat.message or []
         messages.append({
             "role": "assistant",
-            "content": message
+            "content": f"Booking confirmed! Number: {message['booking']['booking_number']}, Hotel: {message['booking']['hotel_name']}, Check-in: {message['booking']['check_in']}, Check-out: {message['booking']['check_out']}."
+            #"content": message
         })
         chat.message = messages
         chat.save()
