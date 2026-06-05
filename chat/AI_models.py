@@ -13,7 +13,8 @@ models={
     "SetupFun"    :     'stepfun/step-3.5-flash:free',
     "Gemma4"     :       "google/gemma-4-31b-it:free",
     "nividia"     :       "nvidia/nemotron-3-super-120b-a12b:free",
-    "mimo"       : "xiaomi/mimo-v2.5"
+    "mimo"       : "xiaomi/mimo-v2.5",
+    "mimo_pro" : "xiaomi/mimo-v2.5-pro"
 }
 
-default_model=models["mimo"]
+default_model=models["mimo_pro"]
