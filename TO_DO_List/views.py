@@ -1,7 +1,6 @@
 from rest_framework.decorators import api_view , permission_classes
 from rest_framework.permissions import IsAuthenticated 
 from rest_framework.response import Response
-import jwt
 from .models import ToDoItems,ToDoList
 from .serializers import todoList_items_serializer,todoList_serializer
 
@@ -19,6 +18,7 @@ def get_all_lists(request):
     return Response({"error": "there is no available lists for this user "})
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_list_view(request):
     user = request.user
     list_name = request.data.get("list_name")
@@ -37,6 +37,7 @@ def create_list_view(request):
     })
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete_list_view(request):
     user = request.user
     list_name = request.data.get("list_name")
@@ -57,6 +58,7 @@ def delete_list_view(request):
     })
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_items_in_list(request, list_name):
     user = request.user
 
@@ -71,6 +73,7 @@ def get_items_in_list(request, list_name):
     return Response(serializer.data)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_todo_view(request):
     user = request.user
     list_name = request.data.get("todo_list_name")
@@ -96,6 +99,7 @@ def add_todo_view(request):
     })
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete_todo_view(request):
     user = request.user
     list_name = request.data.get("todo_list_name")
@@ -119,6 +123,7 @@ def delete_todo_view(request):
     })
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 def update_todo_view(request):
     user = request.user
     list_name = request.data.get("todo_list_name")
