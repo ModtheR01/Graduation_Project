@@ -9,6 +9,8 @@ import traceback
 from django.http import JsonResponse
 from Hotels.models import Hotels
 from chat.models import Chats
+import json
+
 
 @tool
 def search_hotels(country,arr_date,dep_date,num_of_adults,num_of_rooms):
@@ -180,7 +182,8 @@ def get_hotel_booking(request):
         messages = chat.message or []
         messages.append({
             "role": "assistant",
-            "content": f"Booking confirmed! Number: {message['booking']['booking_number']}, Hotel: {message['booking']['hotel_name']}, Check-in: {message['booking']['check_in']}, Check-out: {message['booking']['check_out']}."
+            "content": json.dumps(message, ensure_ascii=False)
+            #"content": f"Booking confirmed! Number: {message['booking']['booking_number']}, Hotel: {message['booking']['hotel_name']}, Check-in: {message['booking']['check_in']}, Check-out: {message['booking']['check_out']}."
             #"content": message
         })
         chat.message = messages

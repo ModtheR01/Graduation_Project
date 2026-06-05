@@ -11,7 +11,7 @@ from Tasks.models import Tasks
 from flights.models import Traveling
 from chat.models import Chats
 from flights.utilities import generate_mock_flights
-
+import json
 
 print("in views")
 HEADERS = {
@@ -241,7 +241,7 @@ def get_ticket(request):
         messages = chat.message or []
         messages.append({
             "role": "assistant",
-            "content": message
+            "content": json.dumps(message, ensure_ascii=False)
         })
         chat.message = messages
         chat.save()
