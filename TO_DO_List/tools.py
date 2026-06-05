@@ -6,6 +6,12 @@ from flights.state_store import get_store
 from .serializers import todoList_items_serializer , todoList_serializer
 from Users.models import User
 
+
+def _refresh_list_finished_state(todo_list: ToDoList):
+    todos = ToDoItems.objects.filter(list_name=todo_list)
+    todo_list.finished = todos.exists() and not todos.filter(finished=False).exists()
+    todo_list.save(update_fields=["finished"])
+
 @tool
 def create_list(list_name: str):
     """
@@ -115,7 +121,7 @@ def manage_todo(operation: int, todo_list_name: str, item_name: str):
             item_name=item_name,
             finished=False
         )
-
+        _refresh_list_finished_state(todo_list)
         return {
             "status": "created",
             "item": item_name
@@ -127,6 +133,7 @@ def manage_todo(operation: int, todo_list_name: str, item_name: str):
             return "no such todo"
 
         todo_qs.delete()
+        _refresh_list_finished_state(todo_list)
         return {
             "status": "deleted",
             "item": item_name
@@ -140,6 +147,7 @@ def manage_todo(operation: int, todo_list_name: str, item_name: str):
         todo = todo_qs.first()
         todo.finished = True
         todo.save()
+        _refresh_list_finished_state(todo_list)
 
         return {
             "status": "updated",

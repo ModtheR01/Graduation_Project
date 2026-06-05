@@ -5,6 +5,12 @@ from .models import ToDoItems,ToDoList
 from .serializers import todoList_items_serializer,todoList_serializer
 
 
+def _refresh_list_finished_state(todo_list: ToDoList):
+    todos = ToDoItems.objects.filter(list_name=todo_list)
+    todo_list.finished = todos.exists() and not todos.filter(finished=False).exists()
+    todo_list.save(update_fields=["finished"])
+
+
 # Create your views here.
 
 @api_view(['GET'])
@@ -93,6 +99,8 @@ def add_todo_view(request):
         finished=False
     )
 
+    _refresh_list_finished_state(todo_list)
+
     return Response({
         "status": "created",
         "item": item_name
@@ -116,6 +124,7 @@ def delete_todo_view(request):
         return Response({"error": "no such todo"}, status=404)
 
     todo_qs.delete()
+    _refresh_list_finished_state(todo_list)
 
     return Response({
         "status": "deleted",
@@ -141,6 +150,7 @@ def update_todo_view(request):
 
     todo.finished = True
     todo.save()
+    _refresh_list_finished_state(todo_list)
 
     return Response({
         "status": "updated",
