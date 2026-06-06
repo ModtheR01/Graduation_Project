@@ -131,7 +131,7 @@ def delete_todo_view(request):
         "item": item_name
     })
 
-@api_view(['GET'])
+@api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_todo_view(request):
     user = request.user
