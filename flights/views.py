@@ -121,8 +121,15 @@ def booking_flight(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,email:str,
     store= get_store()
     offer = store.get("last_offers", {}).get(offer_id)  # Safely get the selected offer:- If "last_offers" exists → use it- If not → use empty dict {} to avoid crash- Then try to get offer_id → returns None if not found (no error)
 
+    # if not offer:
+    #     return {"error": "Invalid offer ID"}
+    # print("SELECTED OFFER:", offer)
+
     if not offer:
-        return {"error": "Invalid offer ID"}
+        available = store.get("last_offers", {})
+        if available:
+            return f"Invalid offer ID. Available offers: {list(available.values())}"
+        return {"error": "No offers available. Please search again."}
     print("SELECTED OFFER:", offer)
 
     booking = {
