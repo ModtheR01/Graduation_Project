@@ -3,7 +3,7 @@ from django.http import JsonResponse
 import requests
 from langchain_core.tools import tool
 import stripe
-from Graduation_Project.backend import flights
+#from Graduation_Project.backend import flights
 from flights.state_store import get_store
 from chat.api_keys import XRapidAPIKey
 from .utilities import get_place_id
