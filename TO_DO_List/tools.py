@@ -139,20 +139,20 @@ def manage_todo(operation: int, todo_list_name: str, item_name: str):
             "item": item_name
         }
 
-    # 🔹 UPDATE
+    # 🔹 UPDATE (TOGGLE)
     elif operation == 3:
         if not todo_qs.exists():
             return "no such todo"
 
         todo = todo_qs.first()
-        todo.finished = True
+        todo.finished = not todo.finished
         todo.save()
         _refresh_list_finished_state(todo_list)
 
         return {
             "status": "updated",
             "item": item_name,
-            "finished": True
+            "finished": todo.finished
         }
 
     # 🔹 INVALID OPERATION

@@ -131,7 +131,7 @@ def delete_todo_view(request):
         "item": item_name
     })
 
-@api_view(['PATCH'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def update_todo_view(request):
     user = request.user
@@ -148,12 +148,12 @@ def update_todo_view(request):
     except ToDoItems.DoesNotExist:
         return Response({"error": "no such todo"}, status=404)
 
-    todo.finished = True
+    todo.finished = not todo.finished
     todo.save()
     _refresh_list_finished_state(todo_list)
 
     return Response({
         "status": "updated",
         "item": item_name,
-        "finished": True
+        "finished": todo.finished
     })
