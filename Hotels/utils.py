@@ -4,6 +4,8 @@ import json
 from Hotels.state_store import get_store_hotels
 import random
 import string
+from Tasks.models import Tasks
+from django.utils import timezone
 
 HEADERS = {
     "x-rapidapi-key": XRapidAPIKey_hotels,
@@ -94,6 +96,11 @@ def func_search_hotels(country, arr_date, dep_date, num_of_adults, num_of_rooms)
     store["arr_date"] = arr_date  
     store["dep_date"] = dep_date  
     store["last_offers"] = {h["id"]: h for h in result}
+    Tasks.objects.update_or_create(
+    chat_id=store.get("chat_id"),
+    task_type="hotel_search",
+    defaults={"offer_data": {str(h["id"]): h for h in result}, "created_at": timezone.now()}
+    )
     #print(f"state_store:{store['last_offers']}")
     print("Hotels API response:", str(data)[:500])
     print("Hotels found:", len(hotels))  # ← وده

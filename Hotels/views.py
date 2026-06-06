@@ -57,10 +57,18 @@ def booking_hotel(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,national_id
         Do NOT add any other text or explanation.
     """
     store=get_store_hotels()
-    offer = store.get("last_offers", {}).get(offer_id) 
+    #offer = store.get("last_offers", {}).get(offer_id) 
 
+    # if not offer:
+    #     return {"error": "Invalid offer ID"}
+    # print("SELECTED OFFER:", offer)
+
+    offer = store.get("last_offers", {}).get(offer_id)
     if not offer:
-        return {"error": "Invalid offer ID"}
+        task = Tasks.objects.filter(chat_id=store.get("chat_id"), task_type="hotel_search").order_by("-created_at").first()
+        offer = task.offer_data.get(str(offer_id)) if task else None
+        if not offer:
+            return {"error": "Invalid offer ID"}
     print("SELECTED OFFER:", offer)
 
     booking = {
