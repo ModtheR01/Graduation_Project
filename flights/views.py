@@ -113,9 +113,6 @@ def search_flights(origin: str, destination: str, date: str):
 def booking_flight(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,email:str,phone_number:str,passport_num:str,passport_expire_date:str,nationality:str):
     """
         book a flight offer by its ID from the last search results.
-            - You MUST determine the offer_id yourself based on the user's chosen flight details (airline, time, route).
-            - NEVER ask the user for the offer_id.
-            - Match the user's chosen flight to the correct offer_id from the last search results.
         IMPORTANT: If the tool returns [PAYMENT_REQUIRED], return ONLY this text as-is:
         "Your booking is ready! The Payment will appear here, Please complete the payment."
         Do NOT add any other text or explanation.
@@ -124,16 +121,16 @@ def booking_flight(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,email:str,
     store= get_store()
     offer = store.get("last_offers", {}).get(offer_id)  # Safely get the selected offer:- If "last_offers" exists → use it- If not → use empty dict {} to avoid crash- Then try to get offer_id → returns None if not found (no error)
 
-    # if not offer:
-    #     return {"error": "Invalid offer ID"}
-    # print("SELECTED OFFER:", offer)
-
     if not offer:
-        available = store.get("last_offers", {})
-        if available:
-            return f"Invalid offer ID. Available offers: {list(available.values())}"
-        return {"error": "No offers available. Please search again."}
+        return {"error": "Invalid offer ID"}
     print("SELECTED OFFER:", offer)
+
+    # if not offer:
+    #     available = store.get("last_offers", {})
+    #     if available:
+    #         return f"Invalid offer ID. Available offers: {list(available.values())}"
+    #     return {"error": "No offers available. Please search again."}
+    # print("SELECTED OFFER:", offer)
 
     booking = {
         "flight": offer,
