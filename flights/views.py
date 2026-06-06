@@ -3,6 +3,7 @@ from django.http import JsonResponse
 import requests
 from langchain_core.tools import tool
 import stripe
+from Graduation_Project.backend import flights
 from flights.state_store import get_store
 from chat.api_keys import XRapidAPIKey
 from .utilities import get_place_id
@@ -59,8 +60,15 @@ def search_flights(origin: str, destination: str, date: str):
 
     if not origin_ids or not dest_ids:
         flights = generate_mock_flights(origin, destination, date)
+        # store = get_store()
+        # store["last_offers"] = {f["id"]: f for f in flights}
         store = get_store()
         store["last_offers"] = {f["id"]: f for f in flights}
+        Tasks.objects.update_or_create(
+            chat_id=store.get("chat_id"),
+            task_type="flight_search",
+            defaults={"offer_data": {str(f["id"]): f for f in flights}, "created_at": timezone.now()}
+        )
         return f"[FINAL_ANSWER]{flights}"
 
     url = "https://skyscanner-flights-travel-api.p.rapidapi.com/flights/searchFlights"
@@ -104,8 +112,16 @@ def search_flights(origin: str, destination: str, date: str):
         print("🔥Using mock flights...")
         flights = generate_mock_flights(origin, destination, date)
 
+    # store = get_store()
+    # store["last_offers"] = {f["id"]: f for f in flights}
+    # return f"[FINAL_ANSWER]{flights}"
     store = get_store()
     store["last_offers"] = {f["id"]: f for f in flights}
+    Tasks.objects.update_or_create(
+        chat_id=store.get("chat_id"),
+        task_type="flight_search",
+        defaults={"offer_data": {str(f["id"]): f for f in flights}, "created_at": timezone.now()}
+    )
     return f"[FINAL_ANSWER]{flights}"
 
 
@@ -119,10 +135,13 @@ def booking_flight(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,email:str,
     """
     print("in booking tool in views")
     store= get_store()
-    offer = store.get("last_offers", {}).get(offer_id)  # Safely get the selected offer:- If "last_offers" exists → use it- If not → use empty dict {} to avoid crash- Then try to get offer_id → returns None if not found (no error)
-
+    #offer = store.get("last_offers", {}).get(offer_id)  # Safely get the selected offer:- If "last_offers" exists → use it- If not → use empty dict {} to avoid crash- Then try to get offer_id → returns None if not found (no error)
+    offer = store.get("last_offers", {}).get(offer_id)
     if not offer:
-        return {"error": "Invalid offer ID"}
+        task = Tasks.objects.filter(chat_id=store.get("chat_id"), task_type="flight_search").order_by("-created_at").first()
+        offer = task.offer_data.get(str(offer_id)) if task else None
+        if not offer:
+            return {"error": "Invalid offer ID"}
     print("SELECTED OFFER:", offer)
 
     # if not offer:
