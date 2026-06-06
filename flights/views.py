@@ -113,6 +113,9 @@ def search_flights(origin: str, destination: str, date: str):
 def booking_flight(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,email:str,phone_number:str,passport_num:str,passport_expire_date:str,nationality:str):
     """
         book a flight offer by its ID from the last search results.
+            - You MUST determine the offer_id yourself based on the user's chosen flight details (airline, time, route).
+            - NEVER ask the user for the offer_id.
+            - Match the user's chosen flight to the correct offer_id from the last search results.
         IMPORTANT: If the tool returns [PAYMENT_REQUIRED], return ONLY this text as-is:
         "Your booking is ready! The Payment will appear here, Please complete the payment."
         Do NOT add any other text or explanation.
