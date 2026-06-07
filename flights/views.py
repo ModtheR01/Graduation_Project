@@ -136,7 +136,8 @@ def booking_flight(offer_id:int,Fname:str,Lname:str,gender:str,BD:str,email:str,
     print("in booking tool in views")
     store= get_store()
     #offer = store.get("last_offers", {}).get(offer_id)  # Safely get the selected offer:- If "last_offers" exists → use it- If not → use empty dict {} to avoid crash- Then try to get offer_id → returns None if not found (no error)
-    offer = store.get("last_offers", {}).get(offer_id)
+    #offer = store.get("last_offers", {}).get(offer_id)
+    offer = store.get("last_offers", {}).get(offer_id) or store.get("last_offers", {}).get(str(offer_id))
     if not offer:
         task = Tasks.objects.filter(chat_id=store.get("chat_id"), task_type="flight_search").order_by("-created_at").first()
         offer = task.offer_data.get(str(offer_id)) if task else None
