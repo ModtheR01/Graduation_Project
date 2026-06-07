@@ -17,4 +17,4 @@ models={
     "mimo_pro" : "xiaomi/mimo-v2.5-pro"
 }
 
-default_model=models["mimo_pro"]
+default_model=models["mimo"]
